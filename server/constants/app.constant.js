@@ -1,0 +1,3 @@
+const TOTAL_BROKER_RECORDS = 914;
+
+module.exports = TOTAL_BROKER_RECORDS;

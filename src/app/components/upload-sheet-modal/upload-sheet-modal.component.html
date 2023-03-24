@@ -1,0 +1,88 @@
+<button
+  id="hidden-button"
+  type="button"
+  class="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#staticBackdrop"
+  #hiddenButton
+>
+  Launch demo modal
+</button>
+
+<div
+  class="modal fade"
+  id="staticBackdrop"
+  tabindex="-1"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <img class="card-img-top" src="assets/images/header.png" />
+      </div>
+      <div class="modal-body">
+        <h5 class="card-title">File Upload:</h5>
+        <p class="card-text">Kindly upload the excel sheet:</p>
+        <form
+          [formGroup]="sheetForm"
+          (ngSubmit)="uploadSheet()"
+          enctype="multipart/form-data"
+        >
+          <div class="input-group mb-3">
+            <input
+              type="file"
+              (change)="handleFileInput($event)"
+              class="form-control"
+              id="excelSheet"
+              aria-describedby="inputGroupFileAddon03"
+              aria-label="Upload"
+              accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            />
+            <small class="custom-error-message" *ngIf="sheetForm.invalid">
+              The file name is too long or, it's empty. Please upload a valid
+              excel(<b>.xlsx</b>) file of less than 1 MB.
+            </small>
+          </div>
+
+          <div class="custom-align custom-top">
+            <button
+              type="submit"
+              class="btn btn-outline-success"
+              [hidden]="sheetForm.invalid"
+            >
+              Upload
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-upload"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+                />
+                <path
+                  d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"
+                />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          (click)="closeModal()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

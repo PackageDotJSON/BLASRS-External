@@ -1,0 +1,42 @@
+.custom-button {
+    display: flex;
+    justify-content: space-between;
+    margin: 1% 10% 0% 10%;
+}
+
+.table-responsive {
+    width: 80%;
+    margin: auto;
+    box-shadow: 4px 4px 4px 4px gray;
+    max-height: 47rem;
+    overflow: auto;
+}
+
+.input-group {
+    width: 20%;
+}
+
+th {
+    background-attachment: fixed;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #1866b4;
+    color: white
+}
+
+.custom-status {
+    color: green;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1866b4;
+}

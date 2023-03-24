@@ -1,0 +1,10 @@
+<app-header></app-header>
+<app-brokers-submissions-table
+  (openModalEvent)="openModal($event)"
+></app-brokers-submissions-table>
+<ng-container *ngIf="displayModal">
+  <app-upload-sheet-modal
+    (closeModalEvent)="closeModal($event)"
+  ></app-upload-sheet-modal>
+</ng-container>
+<app-footer></app-footer>
