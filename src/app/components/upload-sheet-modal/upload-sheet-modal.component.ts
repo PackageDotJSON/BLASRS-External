@@ -8,6 +8,8 @@ import {
   Output,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, tap } from 'rxjs';
+import { IResponse } from 'src/app/models/response.model';
 import { BrokersSubmissionService } from 'src/app/services/brokers-submission.service';
 import { ValidateFile } from 'src/app/validators/file.validator';
 
@@ -20,6 +22,7 @@ export class UploadSheetModalComponent implements OnInit, AfterViewInit {
   @ViewChild('hiddenButton') hiddenButton!: ElementRef;
   @Output() closeModalEvent = new EventEmitter<boolean>();
   sheetForm!: FormGroup;
+  serverResponse$!: Observable<IResponse>;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -53,9 +56,8 @@ export class UploadSheetModalComponent implements OnInit, AfterViewInit {
     const formData = new FormData();
     formData.append('sheetUpload', this.sheetForm.get('sheetUpload')?.value);
 
-    this.brokerSubmissionService
-      .uploadSubmission(formData)
-      .subscribe((res) => console.log(res));
+    this.serverResponse$ =
+      this.brokerSubmissionService.uploadSubmission(formData);
   }
 
   closeModal() {

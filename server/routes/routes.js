@@ -1,12 +1,17 @@
 const router = require("express").Router();
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
+const db2 = require("ibm_db");
 const API_ENDPOINTS = require("../constants/api-endpoints.constant");
 const DB_QUERIES = require("../constants/db-queries.constant");
 const oracleDb = require("../client/oracle-client");
 const dotenv = require("dotenv");
 const validateBrokerSubmission = require("../helper/helper");
 dotenv.config();
+
+const db2Config = Buffer.from(process.env.DB2_CONNECTION_STRING, "base64").toString(
+  "ascii"
+);
 
 /**
  * API Endpoint to download the excel template
@@ -105,12 +110,55 @@ const uploadAlert = multer({
   fileFilter: fileFilterAlert,
 });
 
-router.post(API_ENDPOINTS.POST_SUBMISSION, uploadAlert.single("sheetUpload"), async (req, res) => {
-  const filePath = path.join(`${process.env.BROKER_FILE_PATH}/${req.file.filename}`);
+router.post(
+  API_ENDPOINTS.POST_SUBMISSION,
+  uploadAlert.single("sheetUpload"),
+  async (req, res) => {
+    const filePath = path.join(
+      `${process.env.BROKER_FILE_PATH}/${req.file.filename}`
+    );
 
-  const isFileValid = await validateBrokerSubmission(filePath);
+    const isFileValid = await validateBrokerSubmission(filePath);
 
-  console.log(isFileValid);
+    res.send(isFileValid);
+  }
+);
+
+router.post(API_ENDPOINTS.AUTH, (req, res) => {
+  const { userCnic, userCuin, userPin } = req.body;
+
+  console.log(userCnic, userCuin, userPin);
+
+  const searchDb = "SELECT * FROM ESUSER.USER_COMPANY";
+
+  db2.open(db2Config, (err, conn) => {
+    if (!err) {
+      console.log("Connected Successfully");
+    } else {
+      console.log("Error occurred while connecting with DB2: " + err.message);
+    }
+
+    conn.query(searchDb, (err, results) => {
+      if (!err) {
+        console.log(results);
+      } else {
+        console.log(
+          "Error occurred while searching for all the data: " + err.message
+        );
+      }
+
+      conn.close((err) => {
+        if (!err) {
+          console.log("Connection closed with the database");
+        } else {
+          console.log(
+            "Error occurred while trying to close the connection with the database " +
+              err.message
+          );
+        }
+      });
+    });
+  });
 });
 
 module.exports = router;
