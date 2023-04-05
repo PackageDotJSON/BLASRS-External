@@ -13,10 +13,10 @@ import { IResponse } from '../models/response.model';
 export class BrokersSubmissionService {
   constructor(private http: HttpClient) {}
 
-  fetchSubmissions() {
-    return this.http.get(
-      BASE_URL + API_ENDPOINTS.FETCH_SUBMISSIONS
-    ) as Observable<ISubmission[]>;
+  fetchSubmissions(payload: { userCnic: string; userCuin: string }) {
+    return this.http.get(BASE_URL + API_ENDPOINTS.FETCH_SUBMISSIONS, {
+      params: payload,
+    }) as Observable<ISubmission[]>;
   }
 
   downloadExcelTemplate() {

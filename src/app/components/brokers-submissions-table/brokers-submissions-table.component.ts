@@ -11,6 +11,7 @@ import { DownloadFileService } from 'src/app/services/download-file.service';
 import { TEMPLATE_FILE_SETTINGS } from 'src/app/settings/app.settings';
 import { Subscription, Observable } from 'rxjs';
 import { ISubmission } from 'src/app/models/submissions.model';
+import { LOCAL_STORAGE_KEY } from 'src/app/enums/local-storage-key.enum';
 
 @Component({
   selector: 'app-brokers-submissions-table',
@@ -37,8 +38,13 @@ export class BrokersSubmissionsTableComponent implements OnInit, OnDestroy {
   }
 
   fetchSubmissions() {
+    const payload = {
+      userCnic: localStorage.getItem(LOCAL_STORAGE_KEY.USER_CNIC)!,
+      userCuin: localStorage.getItem(LOCAL_STORAGE_KEY.USER_CUIN)!,
+    };
+
     this.brokerSubmissions$ = this.brokersSubmissionService
-      .fetchSubmissions()
+      .fetchSubmissions(payload)
       .pipe(
         tap((res) => {
           res && (this.isLoading = false);

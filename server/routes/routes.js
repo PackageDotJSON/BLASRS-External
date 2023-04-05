@@ -9,9 +9,10 @@ const dotenv = require("dotenv");
 const validateBrokerSubmission = require("../helper/helper");
 dotenv.config();
 
-const db2Config = Buffer.from(process.env.DB2_CONNECTION_STRING, "base64").toString(
-  "ascii"
-);
+const db2Config = Buffer.from(
+  process.env.DB2_CONNECTION_STRING,
+  "base64"
+).toString("ascii");
 
 /**
  * API Endpoint to download the excel template
@@ -29,6 +30,8 @@ router.get(API_ENDPOINTS.TEMPLATE, (req, res) => {
  */
 
 router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
+  const { userCnic, userCuin } = req.query;
+
   oracleDb.getConnection(
     {
       user: process.env.ORACLEDB_USER,
@@ -45,34 +48,37 @@ router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
         );
       }
 
-      conn.execute(DB_QUERIES.FETCH_SUBMISSIONS, (err, results) => {
-        if (!err) {
-          res.send(results.rows);
-        } else {
-          console.log(
-            "Error occurred while fetching the submissions in Oracle " +
-              err.message
-          );
-        }
-
-        conn.release((err) => {
+      conn.execute(
+        DB_QUERIES.FETCH_SUBMISSIONS,
+        [userCnic, userCuin],
+        (err, results) => {
           if (!err) {
-            console.log("Connection closed with the database");
+            res.send(results.rows);
           } else {
             console.log(
-              "Error occurred while closing the connection with the database " +
+              "Error occurred while fetching the submissions in Oracle " +
                 err.message
             );
           }
-        });
-      });
+
+          conn.release((err) => {
+            if (!err) {
+              console.log("Connection closed with the database");
+            } else {
+              console.log(
+                "Error occurred while closing the connection with the database " +
+                  err.message
+              );
+            }
+          });
+        }
+      );
     }
   );
 });
 
 /**
- * API Endpoint to upload the broker's sheet
- * @param {File}
+ * Handling file input
  */
 
 const storageAlert = multer.diskStorage({
@@ -110,6 +116,11 @@ const uploadAlert = multer({
   fileFilter: fileFilterAlert,
 });
 
+/**
+ * API Endpoint to upload the broker's sheet
+ * @param {File}
+ */
+
 router.post(
   API_ENDPOINTS.POST_SUBMISSION,
   uploadAlert.single("sheetUpload"),
@@ -124,12 +135,13 @@ router.post(
   }
 );
 
+/**
+ * API Endpoint to authenticate the user
+ * @param {userCnic, userCuin, userPin}
+ */
+
 router.post(API_ENDPOINTS.AUTH, (req, res) => {
   const { userCnic, userCuin, userPin } = req.body;
-
-  console.log(userCnic, userCuin, userPin);
-
-  const searchDb = "SELECT * FROM ESUSER.USER_COMPANY";
 
   db2.open(db2Config, (err, conn) => {
     if (!err) {
@@ -138,26 +150,42 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
       console.log("Error occurred while connecting with DB2: " + err.message);
     }
 
-    conn.query(searchDb, (err, results) => {
-      if (!err) {
-        console.log(results);
-      } else {
-        console.log(
-          "Error occurred while searching for all the data: " + err.message
-        );
-      }
-
-      conn.close((err) => {
+    conn.query(
+      DB_QUERIES.AUTH_USER,
+      [userCnic, userCuin, userPin],
+      (err, results) => {
         if (!err) {
-          console.log("Connection closed with the database");
+          if (results[0]?.SIGNATORY_ALLOWED === "YES") {
+            res.send({
+              statusCode: 200,
+              message: "Authenticated",
+              error: false,
+            });
+          } else {
+            res.send({
+              statusCode: 401,
+              message: "Invalid Credentials",
+              error: true,
+            });
+          }
         } else {
           console.log(
-            "Error occurred while trying to close the connection with the database " +
-              err.message
+            "Error occurred while searching for all the data: " + err.message
           );
         }
-      });
-    });
+
+        conn.close((err) => {
+          if (!err) {
+            console.log("Connection closed with the database");
+          } else {
+            console.log(
+              "Error occurred while trying to close the connection with the database " +
+                err.message
+            );
+          }
+        });
+      }
+    );
   });
 });
 
