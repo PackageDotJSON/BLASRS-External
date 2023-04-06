@@ -6,7 +6,10 @@ const API_ENDPOINTS = require("../constants/api-endpoints.constant");
 const DB_QUERIES = require("../constants/db-queries.constant");
 const oracleDb = require("../client/oracle-client");
 const dotenv = require("dotenv");
-const validateBrokerSubmission = require("../helper/helper");
+const {
+  validateBrokerSubmission,
+  validateSubmissionRecord,
+} = require("../helper/helper");
 dotenv.config();
 
 const db2Config = Buffer.from(
@@ -129,7 +132,12 @@ router.post(
       `${process.env.BROKER_FILE_PATH}/${req.file.filename}`
     );
 
-    const isFileValid = await validateBrokerSubmission(filePath);
+    let isFileValid = await validateBrokerSubmission(filePath);
+
+    if (isFileValid.statusCode === 200) {
+      const totalRecords = await validateSubmissionRecord(filePath);
+      isFileValid = { ...isFileValid, data: { ...totalRecords } };
+    }
 
     res.send(isFileValid);
   }

@@ -1,22 +1,18 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { CanActivate, CanLoad } from '@angular/router';
+import { CanActivate } from '@angular/router';
 import { Subscription, tap } from 'rxjs';
 import { UserState } from 'src/app/state-management/user.state';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuard implements CanActivate, CanLoad, OnDestroy {
+export class AuthGuard implements CanActivate, OnDestroy {
   isActivate = false;
   subscription = new Subscription();
 
   constructor(private userState: UserState) {}
 
   canActivate() {
-    return this.routeActivationFunction();
-  }
-
-  canLoad(): boolean {
     return this.routeActivationFunction();
   }
 
@@ -36,6 +32,6 @@ export class AuthGuard implements CanActivate, CanLoad, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

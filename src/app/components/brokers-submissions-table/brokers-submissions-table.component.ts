@@ -11,7 +11,8 @@ import { DownloadFileService } from 'src/app/services/download-file.service';
 import { TEMPLATE_FILE_SETTINGS } from 'src/app/settings/app.settings';
 import { Subscription, Observable } from 'rxjs';
 import { ISubmission } from 'src/app/models/submissions.model';
-import { LOCAL_STORAGE_KEY } from 'src/app/enums/local-storage-key.enum';
+import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
+import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
 
 @Component({
   selector: 'app-brokers-submissions-table',
@@ -26,7 +27,8 @@ export class BrokersSubmissionsTableComponent implements OnInit, OnDestroy {
 
   constructor(
     private brokersSubmissionService: BrokersSubmissionService,
-    private downloadFileService: DownloadFileService
+    private downloadFileService: DownloadFileService,
+    private sessionStorageService: SessionStorageService
   ) {}
 
   ngOnInit(): void {
@@ -39,8 +41,12 @@ export class BrokersSubmissionsTableComponent implements OnInit, OnDestroy {
 
   fetchSubmissions() {
     const payload = {
-      userCnic: localStorage.getItem(LOCAL_STORAGE_KEY.USER_CNIC)!,
-      userCuin: localStorage.getItem(LOCAL_STORAGE_KEY.USER_CUIN)!,
+      userCnic: this.sessionStorageService.getData(
+        SESSION_STORAGE_KEY.USER_CNIC
+      )!,
+      userCuin: this.sessionStorageService.getData(
+        SESSION_STORAGE_KEY.USER_CUIN
+      )!,
     };
 
     this.brokerSubmissions$ = this.brokersSubmissionService

@@ -65,6 +65,9 @@
         <td>{{ submission[3] }}</td>
         <td><span class="badge text-bg-success">Submitted</span></td>
       </tr>
+      <tr class="custom-text" *ngIf="submissions.length === 0">
+        <td colspan="6">No Record Found.</td> 
+      </tr>
     </tbody>
   </table>
 </div>

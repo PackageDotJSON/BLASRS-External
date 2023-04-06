@@ -23,6 +23,7 @@ export class UploadSheetModalComponent implements OnInit, AfterViewInit {
   @Output() closeModalEvent = new EventEmitter<boolean>();
   sheetForm!: FormGroup;
   serverResponse$!: Observable<IResponse>;
+  isValidResponse = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -56,8 +57,15 @@ export class UploadSheetModalComponent implements OnInit, AfterViewInit {
     const formData = new FormData();
     formData.append('sheetUpload', this.sheetForm.get('sheetUpload')?.value);
 
-    this.serverResponse$ =
-      this.brokerSubmissionService.uploadSubmission(formData);
+    this.serverResponse$ = this.brokerSubmissionService
+      .uploadSubmission(formData)
+      .pipe(
+        tap((res) => {
+          res.statusCode === 200
+            ? (this.isValidResponse = true)
+            : (this.isValidResponse = false);
+        })
+      );
   }
 
   closeModal() {

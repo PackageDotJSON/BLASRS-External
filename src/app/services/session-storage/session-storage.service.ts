@@ -3,20 +3,20 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class LocalStorageService {
+export class SessionStorageService {
   setData(key: string, data: string) {
-    localStorage.setItem(key, data);
+    sessionStorage.setItem(key, data);
   }
 
   getData(key: string) {
-    return localStorage.getItem(key);
+    return sessionStorage.getItem(key);
   }
 
   deleteData(key: string) {
-    return localStorage.removeItem(key);
+    return sessionStorage.removeItem(key);
   }
 
   clearLocalStorage() {
-    localStorage.clear();
+    sessionStorage.clear();
   }
 }

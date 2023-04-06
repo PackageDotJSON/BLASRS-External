@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { LOCAL_STORAGE_KEY } from 'src/app/enums/local-storage-key.enum';
+import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
 import { APP_ROUTES } from 'src/app/enums/routes.enum';
 import { IResponse } from 'src/app/models/response.model';
-import { LocalStorageService } from 'src/app/services/local-storage/local-storage.service';
+import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
 import { LoginService } from 'src/app/services/login.service';
 
 @Component({
@@ -22,7 +22,7 @@ export class LoginCardComponent implements OnInit {
     private formBuilder: FormBuilder,
     private loginService: LoginService,
     private router: Router,
-    private localStorageService: LocalStorageService
+    private sessionStorageService: SessionStorageService
   ) {}
 
   ngOnInit(): void {
@@ -48,16 +48,16 @@ export class LoginCardComponent implements OnInit {
         tap((res) => {
           this.isResponseValid = false;
           if (res.statusCode === 200) {
-            this.localStorageService.setData(
-              LOCAL_STORAGE_KEY.USER_CNIC,
+            this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.USER_CNIC,
               this.authForm.value.userCnic
             );
-            this.localStorageService.setData(
-              LOCAL_STORAGE_KEY.USER_CUIN,
+            this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.USER_CUIN,
               this.authForm.value.userCuin
             );
-            this.localStorageService.setData(
-              LOCAL_STORAGE_KEY.USER_PIN,
+            this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.USER_PIN,
               this.authForm.value.userPin
             );
             this.router.navigateByUrl(APP_ROUTES.HOME_URL);

@@ -18,12 +18,16 @@
   aria-labelledby="staticBackdropLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-dialog-centered">
+  <div
+    class="modal-dialog modal-dialog-centered"
+    [ngClass]="{ 'modal-lg': isValidResponse === true }"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <img class="card-img-top" src="assets/images/header.png" />
       </div>
-      <div class="modal-body">
+
+      <div class="modal-body" *ngIf="!isValidResponse">
         <h5 class="card-title">File Upload:</h5>
         <p class="card-text">Kindly upload the excel sheet:</p>
         <form
@@ -73,6 +77,51 @@
           </div>
         </form>
       </div>
+
+      <div class="modal-body" *ngIf="isValidResponse">
+        <h5 class="card-title">Verification:</h5>
+        <p class="card-text">
+          Kindly verify the below details. Once the file has been submitted it
+          cannot be changed.
+        </p>
+        <p>The file you uploaded contains</p>
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Total Debit Amount</th>
+                <th scope="col">Total Credit Amount</th>
+                <th scope="col">Period Ended</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="serverResponse$ | async as response">
+                <td>{{ response.data.totalDebit }}</td>
+                <td>{{ response.data.totalCredit }}</td>
+                <td>{{ response.data.periodEnded | date : "longDate" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="custom-align custom-top">
+          <button type="submit" class="btn btn-outline-success">
+            Verify
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-check2"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button
           type="button"

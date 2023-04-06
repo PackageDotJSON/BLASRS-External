@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { LOCAL_STORAGE_KEY } from '../enums/local-storage-key.enum';
-import { LocalStorageService } from '../services/local-storage/local-storage.service';
+import { SESSION_STORAGE_KEY } from '../enums/session-storage-key.enum';
+import { SessionStorageService } from '../services/session-storage/session-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,10 +9,10 @@ import { LocalStorageService } from '../services/local-storage/local-storage.ser
 export class UserState implements OnDestroy {
   private isLogin$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private localStorageService: LocalStorageService) {}
+  constructor(private sessionStorageService: SessionStorageService) {}
 
   userState() {
-    if (this.localStorageService.getData(LOCAL_STORAGE_KEY.USER_CNIC)) {
+    if (this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CNIC)) {
       this.isLogin$.next(true);
     }
     return this.isLogin$.asObservable();

@@ -1,6 +1,9 @@
 const xlsxFile = require("read-excel-file/node");
 const TOTAL_BROKER_RECORDS = require("../constants/app.constant");
-const { FILE_TEMPLATE_CONTENT, FILE_SECONDARY_CODES } = require('../constants/file-template.constant');
+const {
+  FILE_TEMPLATE_CONTENT,
+  FILE_SECONDARY_CODES,
+} = require("../constants/file-template.constant");
 
 const validateBrokerSubmission = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
@@ -10,7 +13,7 @@ const validateBrokerSubmission = async (filePath) => {
     if (fileRecords !== TOTAL_BROKER_RECORDS) {
       return {
         statusCode: 406,
-        message: 'The file does not contain 916 records.',
+        message: "The file does not contain 916 records.",
         error: true,
       };
     }
@@ -27,29 +30,51 @@ const validateBrokerSubmission = async (filePath) => {
         brokerMetaData[2][2] === "Credit" &&
         brokerMetaData[2][3] === "Secondary \nCodes"
       ) {
-        for(let i = 0; i < rows.length; i++) {
-          if(rows[i][0] !== FILE_TEMPLATE_CONTENT[i] || rows[i][3] !== FILE_SECONDARY_CODES[i]) {
+        for (let i = 0; i < rows.length; i++) {
+          if (
+            rows[i][0] !== FILE_TEMPLATE_CONTENT[i] ||
+            rows[i][3] !== FILE_SECONDARY_CODES[i]
+          ) {
             return {
               statusCode: 406,
-              message: 'Some of the contents of the file are missing or is in incorrect format. Please try again',
+              message:
+                "Some of the contents of the file are missing or is in incorrect format. Please try again",
               error: true,
             };
           }
         }
         return {
           statusCode: 200,
-          message: 'Valid file',
+          message: "The file is Valid",
           error: false,
         };
       }
     } else {
       return {
         statusCode: 406,
-        message: 'Invalid file template',
+        message: "Invalid file template",
         error: true,
       };
     }
   });
 };
 
-module.exports = validateBrokerSubmission;
+const validateSubmissionRecord = async (filePath) => {
+  return xlsxFile(filePath).then((rows) => {
+    let periodEnded = rows[1][2];
+    let totalDebit = 0;
+    let totalCredit = 0;
+    for (let i = 3; i < rows.length; i++) {
+      totalDebit = totalDebit + rows[i][1];
+      totalCredit = totalCredit + rows[i][2];
+    }
+
+    return {
+      totalDebit,
+      totalCredit,
+      periodEnded
+    };
+  });
+};
+
+module.exports = { validateBrokerSubmission, validateSubmissionRecord };

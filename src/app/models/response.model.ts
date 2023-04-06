@@ -1,5 +1,5 @@
 export interface IResponse {
-  data?: unknown[];
+  data?: any | any[];
   statusCode: number;
   message: string;
   error: boolean;

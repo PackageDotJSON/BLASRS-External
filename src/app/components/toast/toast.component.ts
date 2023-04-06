@@ -12,8 +12,8 @@ export class ToastComponent implements OnInit {
   @Input() toastMessage!: string;
 
   ngOnInit(): void {
-    const toastLiveExample = document.getElementById('liveToast')!;
-    const toast = new bootstrap.Toast(toastLiveExample);
+    const toastElement = document.getElementById('toast')!;
+    const toast = new bootstrap.Toast(toastElement);
 
     toast.show();
   }
