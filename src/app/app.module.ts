@@ -15,6 +15,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { appRoutes } from './routes/routes';
 import { LoginCardComponent } from './components/login-card/login-card.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { HTTP_INTERCEPTOR_SETTINGS } from './settings/app.settings';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,9 @@ import { ToastComponent } from './components/toast/toast.component';
     ReactiveFormsModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [],
+  providers: [
+    HTTP_INTERCEPTOR_SETTINGS
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

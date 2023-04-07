@@ -49,6 +49,10 @@ export class LoginCardComponent implements OnInit {
           this.isResponseValid = false;
           if (res.statusCode === 200) {
             this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.TOKEN,
+              res.data
+            );
+            this.sessionStorageService.setData(
               SESSION_STORAGE_KEY.USER_CNIC,
               this.authForm.value.userCnic
             );

@@ -10,6 +10,7 @@ const {
   validateBrokerSubmission,
   validateSubmissionRecord,
 } = require("../helper/helper");
+const { generateToken, verifyToken } = require("../token/token");
 dotenv.config();
 
 const db2Config = Buffer.from(
@@ -23,6 +24,18 @@ const db2Config = Buffer.from(
  */
 
 router.get(API_ENDPOINTS.TEMPLATE, (req, res) => {
+  const token = req.get("Authorization");
+  const isTokenValid = verifyToken(token);
+
+  if (isTokenValid !== true) {
+    res.send({
+      statusCode: 401,
+      message: "UnAuthorized",
+      error: true,
+    });
+    return;
+  }
+
   const templatePath = process.env.TEMPLATE_PATH;
   res.sendFile(templatePath);
 });
@@ -34,6 +47,18 @@ router.get(API_ENDPOINTS.TEMPLATE, (req, res) => {
 
 router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
   const { userCnic, userCuin } = req.query;
+
+  const token = req.get("Authorization");
+  const isTokenValid = verifyToken(token);
+
+  if (isTokenValid !== true) {
+    res.send({
+      statusCode: 401,
+      message: "UnAuthorized",
+      error: true,
+    });
+    return;
+  }
 
   oracleDb.getConnection(
     {
@@ -128,6 +153,18 @@ router.post(
   API_ENDPOINTS.POST_SUBMISSION,
   uploadAlert.single("sheetUpload"),
   async (req, res) => {
+    const token = req.get("Authorization");
+    const isTokenValid = verifyToken(token);
+
+    if (isTokenValid !== true) {
+      res.send({
+        statusCode: 401,
+        message: "UnAuthorized",
+        error: true,
+      });
+      return;
+    }
+
     const filePath = path.join(
       `${process.env.BROKER_FILE_PATH}/${req.file.filename}`
     );
@@ -165,6 +202,7 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
         if (!err) {
           if (results[0]?.SIGNATORY_ALLOWED === "YES") {
             res.send({
+              data: generateToken(userCuin),
               statusCode: 200,
               message: "Authenticated",
               error: false,
