@@ -81,7 +81,7 @@
       <div class="modal-body" *ngIf="isValidResponse">
         <h5 class="card-title">Verification:</h5>
         <p class="card-text">
-          Kindly verify the below details. Once the file has been submitted it
+          Please confirm the below details. Once the file has been submitted it
           cannot be changed.
         </p>
         <p>The file you uploaded contains</p>
@@ -98,14 +98,18 @@
               <tr *ngIf="serverResponse$ | async as response">
                 <td>{{ response.data.totalDebit }}</td>
                 <td>{{ response.data.totalCredit }}</td>
-                <td>{{ response.data.periodEnded | date : "longDate" }}</td>
+                <td>{{ response.data.periodEnded }}</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="custom-align custom-top">
-          <button type="submit" class="btn btn-outline-success">
-            Verify
+          <button
+            type="submit"
+            class="btn btn-outline-success"
+            (click)="uploadConfirmation()"
+          >
+            Confirm
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -122,8 +126,15 @@
         </div>
       </div>
 
+      <div class="d-flex justify-content-center" *ngIf="!isResponseReceived">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button
+          #closeButton
           type="button"
           class="btn btn-secondary"
           data-bs-dismiss="modal"
@@ -135,11 +146,3 @@
     </div>
   </div>
 </div>
-
-<ng-container *ngIf="serverResponse$ | async as response">
-  <app-toast
-    [toastColor]="response.error === false ? 'bg-success' : 'bg-danger'"
-    [toastOperation]="response.statusCode === 200 ? 'Success' : 'Failure'"
-    [toastMessage]="response.message"
-  ></app-toast>
-</ng-container>

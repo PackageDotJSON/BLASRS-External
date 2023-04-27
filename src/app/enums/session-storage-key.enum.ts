@@ -2,5 +2,7 @@ export const enum SESSION_STORAGE_KEY {
     USER_CNIC = 'CNIC',
     USER_CUIN = 'CUIN',
     USER_PIN = 'PIN',
-    TOKEN = 'AUTH_TOKEN'
+    TOKEN = 'AUTH_TOKEN',
+    COMPANY_NAME = 'COMPANY_NAME',
+    COMPANY_ID = 'COMPANY_ID'
 }

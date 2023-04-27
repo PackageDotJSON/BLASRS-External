@@ -14,11 +14,10 @@ const generateToken = (cuin) => {
 };
 
 const verifyToken = (token) => {
-
-  if(!token) {
+  if (!token) {
     return "No Token Provided";
   }
-  token = token.split(' ')[1];
+  token = token.split(" ")[1];
   return jwt.verify(token, privateKey, (err, decoded) => {
     if (!err) {
       return true;

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import * as bootstrap from 'bootstrap';
 
 @Component({
@@ -6,15 +6,17 @@ import * as bootstrap from 'bootstrap';
   templateUrl: './toast.component.html',
   styleUrls: ['./toast.component.scss'],
 })
-export class ToastComponent implements OnInit {
+export class ToastComponent implements OnChanges {
   @Input() toastColor!: string;
   @Input() toastOperation!: string;
   @Input() toastMessage!: string;
 
-  ngOnInit(): void {
-    const toastElement = document.getElementById('toast')!;
-    const toast = new bootstrap.Toast(toastElement);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes) {
+      const toastElement = document.getElementById('toast')!;
+      const toast = new bootstrap.Toast(toastElement);
 
-    toast.show();
+      toast.show();
+    }
   }
 }

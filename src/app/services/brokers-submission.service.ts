@@ -31,4 +31,11 @@ export class BrokersSubmissionService {
       payload
     ) as Observable<IResponse>;
   }
+
+  uploadConfirmation(payload: FormData) {
+    return this.http.post(
+      BASE_URL + API_ENDPOINTS.UPLOAD_CONFIRMATION,
+      payload
+    ) as Observable<IResponse>;
+  }
 }

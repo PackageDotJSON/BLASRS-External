@@ -50,7 +50,15 @@ export class LoginCardComponent implements OnInit {
           if (res.statusCode === 200) {
             this.sessionStorageService.setData(
               SESSION_STORAGE_KEY.TOKEN,
-              res.data
+              res.data.token
+            );
+            this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.COMPANY_NAME,
+              res.data.companyName
+            );
+            this.sessionStorageService.setData(
+              SESSION_STORAGE_KEY.COMPANY_ID,
+              res.data.companyId
             );
             this.sessionStorageService.setData(
               SESSION_STORAGE_KEY.USER_CNIC,

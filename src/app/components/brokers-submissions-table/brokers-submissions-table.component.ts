@@ -4,6 +4,9 @@ import {
   OnDestroy,
   Output,
   OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { BrokersSubmissionService } from 'src/app/services/brokers-submission.service';
 import { tap } from 'rxjs/operators';
@@ -13,13 +16,18 @@ import { Subscription, Observable } from 'rxjs';
 import { ISubmission } from 'src/app/models/submissions.model';
 import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
 import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
+import { IResponse } from 'src/app/models/response.model';
 
 @Component({
   selector: 'app-brokers-submissions-table',
   templateUrl: './brokers-submissions-table.component.html',
   styleUrls: ['./brokers-submissions-table.component.scss'],
 })
-export class BrokersSubmissionsTableComponent implements OnInit, OnDestroy {
+export class BrokersSubmissionsTableComponent
+  implements OnInit, OnChanges, OnDestroy
+{
+  @Input() newFiling!: string;
+  @Input() toastResponse!: IResponse;
   @Output() openModalEvent = new EventEmitter<boolean>();
   brokerSubmissions$!: Observable<ISubmission[]>;
   subscription = new Subscription();
@@ -35,11 +43,17 @@ export class BrokersSubmissionsTableComponent implements OnInit, OnDestroy {
     this.fetchSubmissions();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    changes['newFiling']?.currentValue === 'confirmEvent' &&
+      this.fetchSubmissions();
+  }
+
   openModal() {
     this.openModalEvent.emit(true);
   }
 
   fetchSubmissions() {
+    this.isLoading = true;
     const payload = {
       userCnic: this.sessionStorageService.getData(
         SESSION_STORAGE_KEY.USER_CNIC

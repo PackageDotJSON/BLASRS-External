@@ -1,10 +1,14 @@
 <app-header></app-header>
 <app-brokers-submissions-table
+  [newFiling]="newFiling"
+  [toastResponse]="toastValue"
   (openModalEvent)="openModal($event)"
 ></app-brokers-submissions-table>
 <ng-container *ngIf="displayModal">
   <app-upload-sheet-modal
     (closeModalEvent)="closeModal($event)"
+    (newSubmissionEvent)="newSubmission($event)"
+    (toastResponse)="toastResponse($event)"
   ></app-upload-sheet-modal>
 </ng-container>
 <app-footer></app-footer>

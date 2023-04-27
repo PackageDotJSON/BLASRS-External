@@ -18,6 +18,12 @@ const validateBrokerSubmission = async (filePath) => {
       };
     }
 
+    const isValidDate = validatePeriodEnded(brokerMetaData[1][2]);
+
+    if(isValidDate.statusCode !== 200) {
+      return isValidDate;
+    }
+
     if (
       brokerMetaData[0][0] === "Broker's Name" &&
       brokerMetaData[0][1] === "Broker's CUIN" &&
@@ -69,12 +75,67 @@ const validateSubmissionRecord = async (filePath) => {
       totalCredit = totalCredit + rows[i][2];
     }
 
+    periodEnded = periodEnded.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
     return {
       totalDebit,
       totalCredit,
-      periodEnded
+      periodEnded,
     };
   });
 };
 
-module.exports = { validateBrokerSubmission, validateSubmissionRecord };
+const readExcelData = async (filePath) => {
+  return xlsxFile(filePath).then((rows) => {
+    rows.splice(0, 3);
+    return rows;
+  });
+};
+
+const validatePeriodEnded = (periodEnded) => {
+  const date = new Date();
+  let currentMonth = Number(date.getMonth()) + 1;
+  currentMonth = currentMonth.toString();
+  const currentYear = date.getFullYear();
+  
+  const periodDay = periodEnded.getDate();
+  let periodMonth = Number(periodEnded.getMonth()) + 1;
+  periodMonth = periodMonth.toString();
+  const periodYear = periodEnded.getFullYear();
+
+  if(periodDay !== 31 && periodDay !== 30 && periodDay !== 29) {
+    return {
+      statusCode: 406,
+      message: "The entered date is invalid. Kindly enter the last date of the month.",
+      error: true,
+    }
+  }
+  if(periodMonth > currentMonth) {
+    return {
+      statusCode: 406,
+      message: "The entered month is invalid. You cannot upload the submissions of the next month.",
+      error: true,
+    }
+  }
+  if(periodYear !== currentYear) {
+    return {
+      statusCode: 406,
+      message: "The entered year is invalid. You cannot upload the submissions of the next year.",
+      error: true,
+    }
+  } else {
+    return {
+      statusCode: 200
+    }
+  }
+}
+
+module.exports = {
+  validateBrokerSubmission,
+  validateSubmissionRecord,
+  readExcelData,
+};

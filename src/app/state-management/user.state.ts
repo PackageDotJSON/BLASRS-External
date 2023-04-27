@@ -12,9 +12,10 @@ export class UserState implements OnDestroy {
   constructor(private sessionStorageService: SessionStorageService) {}
 
   userState() {
-    if (this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CNIC)) {
-      this.isLogin$.next(true);
-    }
+    this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CNIC)
+      ? this.isLogin$.next(true)
+      : this.isLogin$.next(false);
+
     return this.isLogin$.asObservable();
   }
 
