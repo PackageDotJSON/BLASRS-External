@@ -14,7 +14,7 @@ app.disable("x-powered-by");
 
 app.enable("trust proxy");
 
-app.use(express.static(__dirname + '/dist/blasrs-external'));
+app.use(express.static(path.join(__dirname, '../dist/blasrs-external')));
 
 app.get('/*', (req, res) => res.sendFile(path.join(__dirname)));
 

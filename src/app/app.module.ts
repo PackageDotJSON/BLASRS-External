@@ -15,7 +15,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { appRoutes } from './routes/routes';
 import { LoginCardComponent } from './components/login-card/login-card.component';
 import { ToastComponent } from './components/toast/toast.component';
-import { HTTP_INTERCEPTOR_SETTINGS } from './settings/app.settings';
+import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.settings';
 
 @NgModule({
   declarations: [
@@ -37,7 +37,8 @@ import { HTTP_INTERCEPTOR_SETTINGS } from './settings/app.settings';
     RouterModule.forRoot(appRoutes)
   ],
   providers: [
-    HTTP_INTERCEPTOR_SETTINGS
+    HTTP_INTERCEPTOR_SETTINGS,
+    LOCATION_STRATEGY
   ],
   bootstrap: [AppComponent]
 })
