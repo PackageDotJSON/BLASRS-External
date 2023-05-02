@@ -35,13 +35,12 @@ ENV NODE_ENV production
 WORKDIR /app
 
 #Add oracle client library path to system variable
-ENV LD_LIBRARY_PATH=/app/oracle/instantclient_21_8
+ENV ORACLE_CLIENT_LOCATION=/app/oracle/instantclient_21_8
 ENV PORT=3002
 ENV ADDRESS=0.0.0.0
 
 # Expose the port that the node.js will listen to
 EXPOSE 3002
-
 
 # Run the node.js server using the PM2
 CMD ["pm2-runtime", "./server/server.js"]
