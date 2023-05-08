@@ -154,7 +154,7 @@
       <button
         type="submit"
         class="btn btn-outline-success"
-        [disabled]="authForm.invalid"
+        [disabled]="authForm.invalid || isResponseValid"
       >
         Sign In
       </button>

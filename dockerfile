@@ -25,6 +25,13 @@ RUN wget https://download.oracle.com/otn_software/linux/instantclient/218000/ins
     unzip instantclient-basic-linux.x64-21.8.0.0.0dbru.zip && \
     rm -f instantclient-basic-linux.x64-21.8.0.0.0dbru.zip
 
+# Download db2 client library
+WORKDIR /app/db2
+
+RUN wget https://public.dhe.ibm.com/storage/tivoli-storage-management/maintenance/client/v7r1/Linux/LinuxX86/BA/v716/gskit8_linuxx86_64_8.0-50.45.tar.gz && \
+    tar -xvf gskit8_linuxx86_64_8.0-50.45.tar.gz && \
+    rm -f gskit8_linuxx86_64_8.0-50.45.tar.gz
+
 # Navigate to the server directory
 WORKDIR /app/server
 
@@ -35,6 +42,7 @@ ENV NODE_ENV production
 WORKDIR /app
 
 #Add oracle client library path to system variable
+ENV LD_LIBRARY_PATH=/app/oracle/instantclient_21_8:/app/db2/gsk8
 ENV ORACLE_CLIENT_LOCATION=/app/oracle/instantclient_21_8
 ENV PORT=3002
 ENV ADDRESS=0.0.0.0
