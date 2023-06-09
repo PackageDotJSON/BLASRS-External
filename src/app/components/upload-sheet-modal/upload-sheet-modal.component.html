@@ -85,7 +85,7 @@
           Please confirm the below details. Once the file has been submitted it
           cannot be changed.
         </p>
-        <p>The file you uploaded contains</p>
+        <p>The file you are trying to upload contains</p>
         <div class="table-responsive">
           <table class="table table-bordered table-striped">
             <thead>
@@ -96,7 +96,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngIf="serverResponse$ | async as response">
+              <tr *ngIf="serverResponse as response">
                 <td>{{ response.data.totalDebit }}</td>
                 <td>{{ response.data.totalCredit }}</td>
                 <td>{{ response.data.periodEnded }}</td>

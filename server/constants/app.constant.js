@@ -1,3 +1,6 @@
 const TOTAL_BROKER_RECORDS = 916;
 
-module.exports = TOTAL_BROKER_RECORDS;
+const EVEN_MONTHS = [ 01, 03, 05, 07, 08, 10, 12 ];
+const ODD_MONTHS = [ 04, 06, 09, 11 ];
+
+module.exports = {TOTAL_BROKER_RECORDS, EVEN_MONTHS, ODD_MONTHS};

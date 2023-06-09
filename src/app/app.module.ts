@@ -1,8 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -14,7 +16,6 @@ import { LoaderComponent } from './components/loader/loader.component';
 import { LoginComponent } from './pages/login/login.component';
 import { appRoutes } from './routes/routes';
 import { LoginCardComponent } from './components/login-card/login-card.component';
-import { ToastComponent } from './components/toast/toast.component';
 import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.settings';
 
 @NgModule({
@@ -28,13 +29,14 @@ import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.set
     LoaderComponent,
     LoginComponent,
     LoginCardComponent,
-    ToastComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    BrowserAnimationsModule,
+    ToastrModule.forRoot()
   ],
   providers: [
     HTTP_INTERCEPTOR_SETTINGS,

@@ -3,5 +3,6 @@ export const enum API_ENDPOINTS {
   FETCH_SUBMISSIONS = '/submissions',
   DOWNLOAD_EXCEL_TEMPLATE = '/template',
   UPLOAD_SUBMISSION = '/submission',
-  UPLOAD_CONFIRMATION = '/confirmation'
+  UPLOAD_CONFIRMATION = '/confirmation',
+  DOWNLOAD_SUBMISSION = '/download'
 }

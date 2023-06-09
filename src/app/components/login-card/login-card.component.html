@@ -165,11 +165,3 @@
     <small>Developed by IS&TD</small>
   </div>
 </div>
-
-<ng-container *ngIf="serverResponse$ | async as response">
-  <app-toast
-    [toastColor]="response.error === false ? 'bg-success' : 'bg-danger'"
-    [toastOperation]="response.statusCode === 200 ? 'Success' : 'Failure'"
-    [toastMessage]="response.message"
-  ></app-toast>
-</ng-container>

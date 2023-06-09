@@ -9,7 +9,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable, Subscription, tap } from 'rxjs';
+import { Subscription, tap } from 'rxjs';
 import { RECORD } from 'src/app/constants/app.constant';
 import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
 import { IBrokerSubmission } from 'src/app/models/broker-submission.model';
@@ -17,6 +17,8 @@ import { IResponse } from 'src/app/models/response.model';
 import { BrokersSubmissionService } from 'src/app/services/brokers-submission.service';
 import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
 import { ValidateFile } from 'src/app/validators/file.validator';
+import { ToastrService } from 'ngx-toastr';
+import { DEBIT_CREDIT_INEQUALITY_ERROR } from 'src/app/settings/app.settings';
 
 @Component({
   selector: 'app-upload-sheet-modal',
@@ -31,19 +33,18 @@ export class UploadSheetModalComponent
   @ViewChild('closeButton') closeButton!: ElementRef;
   @Output() closeModalEvent = new EventEmitter<boolean>();
   @Output() newSubmissionEvent = new EventEmitter<string>();
-  @Output() toastResponse = new EventEmitter<IResponse>();
   sheetForm!: FormGroup;
-  serverResponse$!: Observable<IResponse>;
+  serverResponse!: IResponse;
   isValidResponse = false;
   periodEnded!: string;
   isResponseReceived = true;
   subscription = new Subscription();
-  toastEmitter = false;
 
   constructor(
     private formBuilder: FormBuilder,
     private brokerSubmissionService: BrokersSubmissionService,
-    private sessionStorageService: SessionStorageService
+    private sessionStorageService: SessionStorageService,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -73,22 +74,27 @@ export class UploadSheetModalComponent
     this.isResponseReceived = false;
     const formData = new FormData();
     formData.append('sheetUpload', this.sheetForm.get('sheetUpload')?.value);
+    formData.append('companyName', this.sessionStorageService.getData(SESSION_STORAGE_KEY.COMPANY_NAME)!);
+    formData.append('companyCuin', this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CUIN)!);
 
-    this.serverResponse$ = this.brokerSubmissionService
-      .uploadSubmission(formData)
-      .pipe(
-        tap((res) => {
-          this.isResponseReceived = true;
-          res.statusCode === 200
-            ? ((this.isValidResponse = true),
-              (this.periodEnded = res.data.periodEnded),
-              this.newSubmissionEvent.emit('uploadEvent'),
-              this.toastResponse.emit(res))
-            : (this.isValidResponse = false),
-              this.toastResponse.emit(res);
-        })
-      );
-    this.subscription.add(this.serverResponse$.subscribe());
+    this.subscription.add(
+      this.brokerSubmissionService
+        .uploadSubmission(formData)
+        .pipe(
+          tap((res) => {
+            this.isResponseReceived = true;
+            res.statusCode === 200
+              ? ((this.serverResponse = res),
+                (this.isValidResponse = true),
+                (this.periodEnded = res.data.periodEnded),
+                this.newSubmissionEvent.emit('uploadEvent'),
+                this.toastService.success(res.message))
+              : ((this.isValidResponse = false),
+                this.toastService.error(res.message));
+          })
+        )
+        .subscribe()
+    );
   }
 
   generatePayload() {
@@ -127,6 +133,13 @@ export class UploadSheetModalComponent
   }
 
   uploadConfirmation() {
+    if (
+      this.serverResponse.data.error === true
+    ) {
+      this.toastService.error(DEBIT_CREDIT_INEQUALITY_ERROR);
+      return;
+    }
+
     this.isResponseReceived = false;
     const payload = this.generatePayload();
 
@@ -138,10 +151,11 @@ export class UploadSheetModalComponent
             this.isResponseReceived = true;
             res.statusCode === 200
               ? ((this.isValidResponse = false),
-                this.closeButton.nativeElement.click())
-              : (this.isValidResponse = true);
+                this.closeButton.nativeElement.click(),
+                this.toastService.success(res.message))
+              : ((this.isValidResponse = true),
+                this.toastService.error(res.message));
             this.newSubmissionEvent.emit('confirmEvent');
-            this.toastResponse.emit(res);
           })
         )
         .subscribe()

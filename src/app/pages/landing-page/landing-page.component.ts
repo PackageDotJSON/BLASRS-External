@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { IResponse } from 'src/app/models/response.model';
 
 @Component({
   selector: 'app-landing-page',
@@ -9,14 +8,9 @@ import { IResponse } from 'src/app/models/response.model';
 export class LandingPageComponent {
   displayModal = false;
   newFiling!: string;
-  toastValue!: IResponse;
 
   newSubmission(value: string) {
     this.newFiling = value;
-  }
-
-  toastResponse(value: IResponse) {
-    this.toastValue = value;
   }
 
   openModal(value: boolean) {

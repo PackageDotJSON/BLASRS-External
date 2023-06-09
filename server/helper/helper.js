@@ -1,11 +1,37 @@
 const xlsxFile = require("read-excel-file/node");
-const TOTAL_BROKER_RECORDS = require("../constants/app.constant");
+const writeXlsxFile = require("xlsx-populate");
+const {
+  TOTAL_BROKER_RECORDS,
+  EVEN_MONTHS,
+  ODD_MONTHS,
+} = require("../constants/app.constant");
 const {
   FILE_TEMPLATE_CONTENT,
   FILE_SECONDARY_CODES,
 } = require("../constants/file-template.constant");
+const fs = require("fs");
 
-const validateBrokerSubmission = async (filePath) => {
+const generateExcelTemplate = async (filePath, companyName, companyCuin) => {
+  return writeXlsxFile
+    .fromFileAsync(filePath)
+    .then((workbook) => {
+      const sheet = workbook.sheet(0);
+      const firstRow = sheet.row(2);
+
+      firstRow.cell(1).value(companyName);
+      firstRow.cell(2).value(companyCuin);
+
+      return workbook.toFileAsync(filePath);
+    })
+    .then(() => {
+      console.log("Excel Updated Successfully");
+    })
+    .catch((err) => {
+      console.log("Error Updating Excel file", err);
+    });
+};
+
+const validateBrokerSubmission = async (filePath, companyName, companyCuin) => {
   return xlsxFile(filePath).then((rows) => {
     fileRecords = rows.length - 1;
     brokerMetaData = rows.splice(0, 3);
@@ -18,9 +44,27 @@ const validateBrokerSubmission = async (filePath) => {
       };
     }
 
+    if (companyName !== brokerMetaData[1][0]) {
+      return {
+        statusCode: 406,
+        message:
+          "The company name in the Excel file does not correspond to the currently logged-in company",
+        error: true,
+      };
+    }
+
+    if (companyCuin !== brokerMetaData[1][1]) {
+      return {
+        statusCode: 406,
+        message:
+          "The company CUIN in the Excel file does not correspond to the currently logged-in company",
+        error: true,
+      };
+    }
+
     const isValidDate = validatePeriodEnded(brokerMetaData[1][2]);
 
-    if(isValidDate.statusCode !== 200) {
+    if (isValidDate.statusCode !== 200) {
       return isValidDate;
     }
 
@@ -54,6 +98,12 @@ const validateBrokerSubmission = async (filePath) => {
           message: "The file is Valid",
           error: false,
         };
+      } else {
+        return {
+          statusCode: 406,
+          message: "Invalid file template",
+          error: true,
+        };
       }
     } else {
       return {
@@ -81,10 +131,19 @@ const validateSubmissionRecord = async (filePath) => {
       year: "numeric",
     });
 
+    if (totalDebit !== totalCredit) {
+      return {
+        totalDebit,
+        totalCredit,
+        periodEnded,
+        error: true,
+      };
+    }
     return {
       totalDebit,
       totalCredit,
       periodEnded,
+      error: false,
     };
   });
 };
@@ -101,41 +160,96 @@ const validatePeriodEnded = (periodEnded) => {
   let currentMonth = Number(date.getMonth()) + 1;
   currentMonth = currentMonth.toString();
   const currentYear = date.getFullYear();
-  
-  const periodDay = periodEnded.getDate();
+
+  let periodDay;
+
+  try {
+    periodDay = periodEnded.getDate();
+  } catch (error) {
+    if (error) {
+      return {
+        statusCode: 406,
+        message:
+          "The entered date is invalid. Kindly enter the last date of the month.",
+        error: true,
+      };
+    }
+  }
+
   let periodMonth = Number(periodEnded.getMonth()) + 1;
   periodMonth = periodMonth.toString();
   const periodYear = periodEnded.getFullYear();
 
-  if(periodDay !== 31 && periodDay !== 30 && periodDay !== 29) {
-    return {
-      statusCode: 406,
-      message: "The entered date is invalid. Kindly enter the last date of the month.",
-      error: true,
+  if (Number(periodMonth) === 2) {
+    if (periodDay !== 29 && periodDay !== 28) {
+      return {
+        statusCode: 406,
+        message:
+          "The entered date is invalid. Kindly enter the last date of the month.",
+        error: true,
+      };
     }
   }
-  if(periodMonth > currentMonth) {
-    return {
-      statusCode: 406,
-      message: "The entered month is invalid. You cannot upload the submissions of the next month.",
-      error: true,
+
+  if (EVEN_MONTHS.includes(Number(periodMonth))) {
+    console.log(periodMonth, ' in even')
+    if (periodDay !== 31) {
+      return {
+        statusCode: 406,
+        message:
+          "The entered date is invalid. Kindly enter the last date of the month i.e., 31.",
+        error: true,
+      };
     }
   }
-  if(periodYear !== currentYear) {
+  if (ODD_MONTHS.includes(Number(periodMonth))) {
+    console.log(periodMonth, ' in odd')
+    if (periodDay !== 30) {
+      return {
+        statusCode: 406,
+        message:
+          "The entered date is invalid. Kindly enter the last date of the month i.e., 30",
+        error: true,
+      };
+    }
+  }
+
+  if (Number(periodMonth) > Number(currentMonth)) {
     return {
       statusCode: 406,
-      message: "The entered year is invalid. You cannot upload the submissions of the next year.",
+      message:
+        "The entered month is invalid. You cannot upload the submissions of the next month.",
       error: true,
-    }
+    };
+  }
+  if (periodYear !== currentYear) {
+    return {
+      statusCode: 406,
+      message:
+        "The entered year is invalid. You cannot upload the submissions of the previous or the next year.",
+      error: true,
+    };
   } else {
     return {
-      statusCode: 200
-    }
+      statusCode: 200,
+    };
   }
-}
+};
+
+const deleteFileFromDirectory = (filePath) => {
+  try {
+    fs.unlinkSync(filePath);
+
+    console.log("File Deleted Successfully");
+  } catch (err) {
+    console.log("Error occurred while trying to delete file ", err);
+  }
+};
 
 module.exports = {
   validateBrokerSubmission,
   validateSubmissionRecord,
   readExcelData,
+  generateExcelTemplate,
+  deleteFileFromDirectory,
 };

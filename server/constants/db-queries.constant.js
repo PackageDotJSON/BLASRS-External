@@ -13,6 +13,7 @@ const DB_QUERIES = {
   CREATED_BY, DATA_COMPLETE, UPLOAD_ID, DESCRIPTION, DEBIT_AMOUNT, CREDIT_AMOUNT, SECONDARY_CODES) VALUES 
   (BLASRS_DATA2_SEQ.nextval, :userId, :companyId, :companyName, :companyIncno, 'Excel', :createdBy, 'Submitted', 
   BLASRS_DATA2_SEQ.nextval, :description, :debitAmount, :creditAmount, :secondaryCodes)`,
+  GET_FILE: `SELECT UPLOAD_FILE FROM CRS.BLASRS_DATA_SUBMITTER2 WHERE UPLOAD_ID = :uploadId`,
 };
 
 module.exports = DB_QUERIES;

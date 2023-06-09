@@ -46,7 +46,7 @@ th {
 }
 
 .ribbon {
-  width: 300px;
+  width: 16%;
   position: absolute;
   left: 50%;
   margin-left: -150px;
@@ -108,4 +108,12 @@ th {
 .ribbon .ribbon-content:after {
   right: 0;
   border-width: 1em 1em 0 0;
+}
+
+.row-align {
+  text-align: center;
+}
+
+.custom-hover {
+  cursor: pointer;
 }

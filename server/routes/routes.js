@@ -11,6 +11,8 @@ const {
   validateBrokerSubmission,
   validateSubmissionRecord,
   readExcelData,
+  generateExcelTemplate,
+  deleteFileFromDirectory,
 } = require("../helper/helper");
 const { generateToken, verifyToken } = require("../token/token");
 dotenv.config();
@@ -25,9 +27,10 @@ const db2Config = Buffer.from(
  * @param {}
  */
 
-router.get(API_ENDPOINTS.TEMPLATE, (req, res) => {
+router.get(API_ENDPOINTS.TEMPLATE, async (req, res) => {
   const token = req.get("Authorization");
   const isTokenValid = verifyToken(token);
+  const { companyName, companyCuin } = req.query;
 
   if (isTokenValid !== true) {
     res.send({
@@ -39,7 +42,12 @@ router.get(API_ENDPOINTS.TEMPLATE, (req, res) => {
   }
 
   const templatePath = process.env.TEMPLATE_PATH;
-  res.sendFile(templatePath);
+
+  await generateExcelTemplate(templatePath, companyName, companyCuin).then(
+    () => {
+      res.sendFile(templatePath);
+    }
+  );
 });
 
 /**
@@ -157,6 +165,7 @@ router.post(
   async (req, res) => {
     const token = req.get("Authorization");
     const isTokenValid = verifyToken(token);
+    const { companyName, companyCuin } = req.body;
 
     if (isTokenValid !== true) {
       res.send({
@@ -171,12 +180,18 @@ router.post(
       `${process.env.BROKER_FILE_PATH}/${req.file.filename}`
     );
 
-    let isFileValid = await validateBrokerSubmission(filePath);
+    let isFileValid = await validateBrokerSubmission(
+      filePath,
+      companyName,
+      companyCuin
+    );
 
     if (isFileValid.statusCode === 200) {
       const totalRecords = await validateSubmissionRecord(filePath);
       isFileValid = { ...isFileValid, data: { ...totalRecords } };
     }
+
+    deleteFileFromDirectory(filePath);
 
     res.send(isFileValid);
   }
@@ -360,6 +375,7 @@ router.post(
                       async (err, results) => {
                         if (!err) {
                           await conn.commit();
+                          deleteFileFromDirectory(req.file.path);
                           res.send({
                             statusCode: 200,
                             message: "File Uploaded Successfully",
@@ -464,6 +480,73 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
       }
     );
   });
+});
+
+router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
+    const token = req.get("Authorization");
+    const isTokenValid = verifyToken(token);
+
+    const uploadId = req.query.uploadId;
+
+    if (isTokenValid !== true) {
+      res.send({
+        statusCode: 401,
+        message: "UnAuthorized",
+        error: true,
+      });
+      return;
+    }
+
+    oracleDb.getConnection(
+      {
+        user: process.env.ORACLEDB_USER,
+        password: process.env.ORACLEDB_PASSWORD,
+        connectString: process.env.ORACLEDB_CONNECT_STRING,
+      },
+      (err, conn) => {
+        if (!err) {
+          console.log("Connected to the database successfully");
+        } else {
+          console.log(
+            "Error occurred while trying to connect to the database: " +
+              err.message
+          );
+        }
+  
+        conn.execute(
+          DB_QUERIES.GET_FILE,
+          [uploadId],
+          async (err, results) => {
+            if (!err) {
+              const blob = results.rows[0][0];
+              const excelData = await blob.getData();
+
+              const filePath = path.join(__dirname, '../template/download-submission.xlsx');
+              fs.writeFileSync(filePath, excelData);
+
+              res.sendFile(filePath);
+            } else {
+              console.log(
+                "Error occurred while getting the submission file in Oracle " +
+                  err.message
+              );
+            }
+  
+            conn.release((err) => {
+              if (!err) {
+                console.log("Connection closed with the database");
+              } else {
+                console.log(
+                  "Error occurred while closing the connection with the database " +
+                    err.message
+                );
+              }
+            });
+          }
+        );
+      }
+    );
+
 });
 
 module.exports = router;

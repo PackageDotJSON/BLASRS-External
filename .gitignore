@@ -6,6 +6,7 @@
 /out-tsc
 /bazel-out
 /server/ssl
+/server/.env
 
 # Node
 /node_modules

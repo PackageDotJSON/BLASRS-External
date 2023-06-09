@@ -16,7 +16,6 @@ import { Subscription, Observable } from 'rxjs';
 import { ISubmission } from 'src/app/models/submissions.model';
 import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
 import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
-import { IResponse } from 'src/app/models/response.model';
 
 @Component({
   selector: 'app-brokers-submissions-table',
@@ -27,11 +26,11 @@ export class BrokersSubmissionsTableComponent
   implements OnInit, OnChanges, OnDestroy
 {
   @Input() newFiling!: string;
-  @Input() toastResponse!: IResponse;
   @Output() openModalEvent = new EventEmitter<boolean>();
   brokerSubmissions$!: Observable<ISubmission[]>;
   subscription = new Subscription();
   isLoading = true;
+  isFileDownloading = false;
 
   constructor(
     private brokersSubmissionService: BrokersSubmissionService,
@@ -73,6 +72,7 @@ export class BrokersSubmissionsTableComponent
   }
 
   downloadExcelTemplate() {
+    this.isFileDownloading = true;
     this.subscription.add(
       this.brokersSubmissionService
         .downloadExcelTemplate()
@@ -82,6 +82,25 @@ export class BrokersSubmissionsTableComponent
               res,
               TEMPLATE_FILE_SETTINGS.TYPE
             );
+            this.isFileDownloading = false;
+          })
+        )
+        .subscribe()
+    );
+  }
+
+  downloadSubmission(uploadId: number) {
+    this.isFileDownloading = true;
+    this.subscription.add(
+      this.brokersSubmissionService
+        .downloadSubmission(uploadId)
+        .pipe(
+          tap((res) => {
+            this.downloadFileService.downloadFileToDesktop(
+              res,
+              TEMPLATE_FILE_SETTINGS.TYPE
+            );
+            this.isFileDownloading = false;
           })
         )
         .subscribe()

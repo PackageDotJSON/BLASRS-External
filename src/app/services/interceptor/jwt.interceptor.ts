@@ -3,19 +3,25 @@ import {
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
+  HttpResponse,
 } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription, tap } from 'rxjs';
 import { UserState } from 'src/app/state-management/user.state';
 import { SessionStorageService } from '../session-storage/session-storage.service';
 import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
+import { Router } from '@angular/router';
+import { APP_ROUTES } from 'src/app/enums/routes.enum';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor, OnDestroy {
   subscription = new Subscription();
   constructor(
     private userState: UserState,
-    private sessionStorageService: SessionStorageService
+    private sessionStorageService: SessionStorageService,
+    private router: Router,
+    private toastService: ToastrService
   ) {}
 
   intercept(
@@ -47,7 +53,24 @@ export class JwtInterceptor implements HttpInterceptor, OnDestroy {
       },
     });
 
-    return next.handle(httpRequest);
+    return next.handle(httpRequest).pipe(
+      tap(
+        (event: HttpEvent<any>) => {
+          if (event instanceof HttpResponse) {
+            event.body.statusCode === 401 &&
+              (this.sessionStorageService.clearLocalStorage(),
+              this.router.navigateByUrl(APP_ROUTES.LOGIN_URL));
+          }
+        },
+        (error) => {
+          this.toastService.error(
+            'An unknown error has occurred. Please close the pop-up and attempt to upload again.', 'Major Error', {
+              timeOut: 20000,
+            }
+          );
+        }
+      )
+    );
   }
 
   ngOnDestroy(): void {

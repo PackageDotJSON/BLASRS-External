@@ -10,6 +10,7 @@ export const TEMPLATE_FILE_SETTINGS = {
 };
 
 export const TEMPLATE_REQUEST_RESPONSE_TYPE = 'blob';
+export const DEBIT_CREDIT_INEQUALITY_ERROR = 'The total Debit amount and the total Credit amount should be equal.'
 
 export const HTTP_INTERCEPTOR_SETTINGS = {
   provide: HTTP_INTERCEPTORS,
