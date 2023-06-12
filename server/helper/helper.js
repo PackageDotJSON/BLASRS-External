@@ -71,8 +71,7 @@ const validateBrokerSubmission = async (filePath, companyName, companyCuin) => {
     if (
       brokerMetaData[0][0] === "Broker's Name" &&
       brokerMetaData[0][1] === "Broker's CUIN" &&
-      brokerMetaData[0][2] === "Period Ended (dd/mm/yyyy)" &&
-      brokerMetaData[0][3] === "Date of Filing (dd/mm/yyyy)"
+      brokerMetaData[0][2] === "Period Ended (dd/mm/yyyy)"
     ) {
       if (
         brokerMetaData[2][0] === "Description" &&
@@ -88,7 +87,7 @@ const validateBrokerSubmission = async (filePath, companyName, companyCuin) => {
             return {
               statusCode: 406,
               message:
-                "Some of the contents of the file are missing or is in incorrect format. Please try again",
+                "Invalid Description or Secondary Codes has been found in the file. Please follow the given template.",
               error: true,
             };
           }
@@ -120,9 +119,25 @@ const validateSubmissionRecord = async (filePath) => {
     let periodEnded = rows[1][2];
     let totalDebit = 0;
     let totalCredit = 0;
+    let stringError = false;
+
     for (let i = 3; i < rows.length; i++) {
+      if(typeof totalDebit !== 'number' || typeof totalCredit !== 'number') {
+        stringError = true;
+        break;
+      }
+
       totalDebit = totalDebit + rows[i][1];
       totalCredit = totalCredit + rows[i][2];
+    }
+
+    if(stringError) {
+      return {
+        totalDebit,
+        totalCredit,
+        periodEnded,
+        error: true,
+      }
     }
 
     periodEnded = periodEnded.toLocaleDateString("en-GB", {

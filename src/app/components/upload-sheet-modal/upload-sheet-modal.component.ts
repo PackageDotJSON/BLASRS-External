@@ -18,7 +18,10 @@ import { BrokersSubmissionService } from 'src/app/services/brokers-submission.se
 import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
 import { ValidateFile } from 'src/app/validators/file.validator';
 import { ToastrService } from 'ngx-toastr';
-import { DEBIT_CREDIT_INEQUALITY_ERROR } from 'src/app/settings/app.settings';
+import {
+  DEBIT_CREDIT_INEQUALITY_ERROR,
+  DEBIT_CREDIT_STRING_ERROR,
+} from 'src/app/settings/app.settings';
 
 @Component({
   selector: 'app-upload-sheet-modal',
@@ -74,8 +77,14 @@ export class UploadSheetModalComponent
     this.isResponseReceived = false;
     const formData = new FormData();
     formData.append('sheetUpload', this.sheetForm.get('sheetUpload')?.value);
-    formData.append('companyName', this.sessionStorageService.getData(SESSION_STORAGE_KEY.COMPANY_NAME)!);
-    formData.append('companyCuin', this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CUIN)!);
+    formData.append(
+      'companyName',
+      this.sessionStorageService.getData(SESSION_STORAGE_KEY.COMPANY_NAME)!
+    );
+    formData.append(
+      'companyCuin',
+      this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CUIN)!
+    );
 
     this.subscription.add(
       this.brokerSubmissionService
@@ -133,9 +142,14 @@ export class UploadSheetModalComponent
   }
 
   uploadConfirmation() {
-    if (
-      this.serverResponse.data.error === true
-    ) {
+    if (this.serverResponse.data.error === true) {
+      if (
+        typeof this.serverResponse.data.totalCredit !== 'number' ||
+        typeof this.serverResponse.data.totalDebit !== 'number'
+      ) {
+        this.toastService.error(DEBIT_CREDIT_STRING_ERROR);
+        return;
+      }
       this.toastService.error(DEBIT_CREDIT_INEQUALITY_ERROR);
       return;
     }

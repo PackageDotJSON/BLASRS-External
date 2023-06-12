@@ -11,6 +11,7 @@ export const TEMPLATE_FILE_SETTINGS = {
 
 export const TEMPLATE_REQUEST_RESPONSE_TYPE = 'blob';
 export const DEBIT_CREDIT_INEQUALITY_ERROR = 'The total Debit amount and the total Credit amount should be equal.'
+export const DEBIT_CREDIT_STRING_ERROR = 'You have entered a character in the numerical column. Kindly fix and upload again.'
 
 export const HTTP_INTERCEPTOR_SETTINGS = {
   provide: HTTP_INTERCEPTORS,
