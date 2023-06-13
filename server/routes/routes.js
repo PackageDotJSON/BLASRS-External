@@ -35,7 +35,7 @@ router.get(API_ENDPOINTS.TEMPLATE, async (req, res) => {
   if (isTokenValid !== true) {
     res.send({
       statusCode: 401,
-      message: "UnAuthorized",
+      message: "Session Expired",
       error: true,
     });
     return;
@@ -64,7 +64,7 @@ router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
   if (isTokenValid !== true) {
     res.send({
       statusCode: 401,
-      message: "UnAuthorized",
+      message: "Session Expired",
       error: true,
     });
     return;
@@ -170,7 +170,7 @@ router.post(
     if (isTokenValid !== true) {
       res.send({
         statusCode: 401,
-        message: "UnAuthorized",
+        message: "Session Expired",
         error: true,
       });
       return;
@@ -288,7 +288,7 @@ router.post(
     if (isTokenValid !== true) {
       res.send({
         statusCode: 401,
-        message: "UnAuthorized",
+        message: "Session Expired",
         error: true,
       });
       return;
@@ -491,7 +491,7 @@ router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
     if (isTokenValid !== true) {
       res.send({
         statusCode: 401,
-        message: "UnAuthorized",
+        message: "Session Expired",
         error: true,
       });
       return;

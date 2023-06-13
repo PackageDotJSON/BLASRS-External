@@ -181,6 +181,7 @@ export class UploadSheetModalComponent
   }
 
   ngOnDestroy(): void {
+    this.closeButton.nativeElement.click();
     this.subscription?.unsubscribe();
   }
 }
