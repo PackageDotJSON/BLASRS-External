@@ -35,6 +35,10 @@
           (ngSubmit)="uploadSheet()"
           enctype="multipart/form-data"
         >
+          <p>
+            The file should be uploaded for the period of
+            <b>{{ periodEnded }}</b>
+          </p>
           <div class="input-group mb-3">
             <input
               type="file"
@@ -99,7 +103,7 @@
               <tr *ngIf="serverResponse as response">
                 <td>{{ response.data.totalDebit }}</td>
                 <td>{{ response.data.totalCredit }}</td>
-                <td>{{ response.data.periodEnded }}</td>
+                <td>{{ periodEnded }}</td>
               </tr>
             </tbody>
           </table>

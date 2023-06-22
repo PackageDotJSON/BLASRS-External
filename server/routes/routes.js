@@ -11,10 +11,11 @@ const {
   validateBrokerSubmission,
   validateSubmissionRecord,
   readExcelData,
-  generateExcelTemplate,
   deleteFileFromDirectory,
+  validateDate,
 } = require("../helper/helper");
 const { generateToken, verifyToken } = require("../token/token");
+const { DEFAULT_DATE } = require("../constants/app.constant");
 dotenv.config();
 
 const db2Config = Buffer.from(
@@ -30,7 +31,6 @@ const db2Config = Buffer.from(
 router.get(API_ENDPOINTS.TEMPLATE, async (req, res) => {
   const token = req.get("Authorization");
   const isTokenValid = verifyToken(token);
-  const { companyName, companyCuin } = req.query;
 
   if (isTokenValid !== true) {
     res.send({
@@ -43,11 +43,7 @@ router.get(API_ENDPOINTS.TEMPLATE, async (req, res) => {
 
   const templatePath = process.env.TEMPLATE_PATH;
 
-  await generateExcelTemplate(templatePath, companyName, companyCuin).then(
-    () => {
-      res.sendFile(templatePath);
-    }
-  );
+  res.sendFile(templatePath);
 });
 
 /**
@@ -92,6 +88,81 @@ router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
         (err, results) => {
           if (!err) {
             res.send(results.rows);
+          } else {
+            console.log(
+              "Error occurred while fetching the submissions in Oracle " +
+                err.message
+            );
+          }
+
+          conn.release((err) => {
+            if (!err) {
+              console.log("Connection closed with the database");
+            } else {
+              console.log(
+                "Error occurred while closing the connection with the database " +
+                  err.message
+              );
+            }
+          });
+        }
+      );
+    }
+  );
+});
+
+router.get(API_ENDPOINTS.GET_PERIOD_ENDED_DATE, (req, res) => {
+  const userCuin = req.query.userCuin;
+
+  const token = req.get("Authorization");
+  const isTokenValid = verifyToken(token);
+
+  if (isTokenValid !== true) {
+    res.send({
+      statusCode: 401,
+      message: "Session Expired",
+      error: true,
+    });
+    return;
+  }
+
+  oracleDb.getConnection(
+    {
+      user: process.env.ORACLEDB_USER,
+      password: process.env.ORACLEDB_PASSWORD,
+      connectString: process.env.ORACLEDB_CONNECT_STRING,
+    },
+    (err, conn) => {
+      if (!err) {
+        console.log("Connected to the database successfully");
+      } else {
+        console.log(
+          "Error occurred while trying to connect to the database: " +
+            err.message
+        );
+      }
+
+      conn.execute(
+        DB_QUERIES.GET_PERIOD_ENDED_DATE,
+        [userCuin],
+        (err, results) => {
+          if (!err) {
+            if (!results.rows.flat().includes(null)) {
+              res.send({
+                data: results.rows,
+                statusCode: 200,
+                message: "Success",
+                error: false,
+              });
+            } else {
+              const data = DEFAULT_DATE;
+              res.send({
+                data,
+                statusCode: 200,
+                message: "No Record Found",
+                error: false,
+              });
+            }
           } else {
             console.log(
               "Error occurred while fetching the submissions in Oracle " +
@@ -165,7 +236,6 @@ router.post(
   async (req, res) => {
     const token = req.get("Authorization");
     const isTokenValid = verifyToken(token);
-    const { companyName, companyCuin } = req.body;
 
     if (isTokenValid !== true) {
       res.send({
@@ -180,11 +250,7 @@ router.post(
       `${process.env.BROKER_FILE_PATH}/${req.file.filename}`
     );
 
-    let isFileValid = await validateBrokerSubmission(
-      filePath,
-      companyName,
-      companyCuin
-    );
+    let isFileValid = await validateBrokerSubmission(filePath);
 
     if (isFileValid.statusCode === 200) {
       const totalRecords = await validateSubmissionRecord(filePath);
@@ -306,6 +372,13 @@ router.post(
         recordCount,
         periodEnded,
       } = req.body;
+
+      const isDateValid = validateDate(periodEnded);
+
+      if(isDateValid.error === true) {
+        res.send(isDateValid);
+        return;
+      }
 
       let isSubmissionValid = true;
 
@@ -483,70 +556,68 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
 });
 
 router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
-    const token = req.get("Authorization");
-    const isTokenValid = verifyToken(token);
+  const token = req.get("Authorization");
+  const isTokenValid = verifyToken(token);
 
-    const uploadId = req.query.uploadId;
+  const uploadId = req.query.uploadId;
 
-    if (isTokenValid !== true) {
-      res.send({
-        statusCode: 401,
-        message: "Session Expired",
-        error: true,
-      });
-      return;
-    }
+  if (isTokenValid !== true) {
+    res.send({
+      statusCode: 401,
+      message: "Session Expired",
+      error: true,
+    });
+    return;
+  }
 
-    oracleDb.getConnection(
-      {
-        user: process.env.ORACLEDB_USER,
-        password: process.env.ORACLEDB_PASSWORD,
-        connectString: process.env.ORACLEDB_CONNECT_STRING,
-      },
-      (err, conn) => {
+  oracleDb.getConnection(
+    {
+      user: process.env.ORACLEDB_USER,
+      password: process.env.ORACLEDB_PASSWORD,
+      connectString: process.env.ORACLEDB_CONNECT_STRING,
+    },
+    (err, conn) => {
+      if (!err) {
+        console.log("Connected to the database successfully");
+      } else {
+        console.log(
+          "Error occurred while trying to connect to the database: " +
+            err.message
+        );
+      }
+
+      conn.execute(DB_QUERIES.GET_FILE, [uploadId], async (err, results) => {
         if (!err) {
-          console.log("Connected to the database successfully");
+          const blob = results.rows[0][0];
+          const excelData = await blob.getData();
+
+          const filePath = path.join(
+            __dirname,
+            "../template/download-submission.xlsx"
+          );
+          fs.writeFileSync(filePath, excelData);
+
+          res.sendFile(filePath);
         } else {
           console.log(
-            "Error occurred while trying to connect to the database: " +
+            "Error occurred while getting the submission file in Oracle " +
               err.message
           );
         }
-  
-        conn.execute(
-          DB_QUERIES.GET_FILE,
-          [uploadId],
-          async (err, results) => {
-            if (!err) {
-              const blob = results.rows[0][0];
-              const excelData = await blob.getData();
 
-              const filePath = path.join(__dirname, '../template/download-submission.xlsx');
-              fs.writeFileSync(filePath, excelData);
-
-              res.sendFile(filePath);
-            } else {
-              console.log(
-                "Error occurred while getting the submission file in Oracle " +
-                  err.message
-              );
-            }
-  
-            conn.release((err) => {
-              if (!err) {
-                console.log("Connection closed with the database");
-              } else {
-                console.log(
-                  "Error occurred while closing the connection with the database " +
-                    err.message
-                );
-              }
-            });
+        conn.release((err) => {
+          if (!err) {
+            console.log("Connection closed with the database");
+          } else {
+            console.log(
+              "Error occurred while closing the connection with the database " +
+                err.message
+            );
           }
-        );
-      }
-    );
-
+        });
+      });
+    }
+  );
 });
 
 module.exports = router;

@@ -51,6 +51,7 @@ export class UploadSheetModalComponent
   ) {}
 
   ngOnInit(): void {
+    this.getPeriodEndedDate();
     this.createForm();
   }
 
@@ -62,6 +63,21 @@ export class UploadSheetModalComponent
     this.sheetForm = this.formBuilder.group({
       sheetUpload: [null, [Validators.required, ValidateFile]],
     });
+  }
+
+  getPeriodEndedDate() {
+    this.subscription.add(
+      this.brokerSubmissionService
+        .getPeriodEndedDate(
+          this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CUIN)!
+        )
+        .pipe(
+          tap((res) => {
+            res.data && (this.periodEnded = res.data);
+          })
+        )
+        .subscribe()
+    );
   }
 
   handleFileInput(event: Event) {
@@ -77,14 +93,6 @@ export class UploadSheetModalComponent
     this.isResponseReceived = false;
     const formData = new FormData();
     formData.append('sheetUpload', this.sheetForm.get('sheetUpload')?.value);
-    formData.append(
-      'companyName',
-      this.sessionStorageService.getData(SESSION_STORAGE_KEY.COMPANY_NAME)!
-    );
-    formData.append(
-      'companyCuin',
-      this.sessionStorageService.getData(SESSION_STORAGE_KEY.USER_CUIN)!
-    );
 
     this.subscription.add(
       this.brokerSubmissionService
@@ -95,7 +103,6 @@ export class UploadSheetModalComponent
             res.statusCode === 200
               ? ((this.serverResponse = res),
                 (this.isValidResponse = true),
-                (this.periodEnded = res.data.periodEnded),
                 this.newSubmissionEvent.emit('uploadEvent'),
                 this.toastService.success(res.message))
               : ((this.isValidResponse = false),
@@ -181,7 +188,6 @@ export class UploadSheetModalComponent
   }
 
   ngOnDestroy(): void {
-    this.closeButton.nativeElement.click();
     this.subscription?.unsubscribe();
   }
 }

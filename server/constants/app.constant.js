@@ -1,6 +1,4 @@
-const TOTAL_BROKER_RECORDS = 916;
+const TOTAL_BROKER_RECORDS = 914;
+const DEFAULT_DATE = '31/01/2023';
 
-const EVEN_MONTHS = [ 01, 03, 05, 07, 08, 10, 12 ];
-const ODD_MONTHS = [ 04, 06, 09, 11 ];
-
-module.exports = {TOTAL_BROKER_RECORDS, EVEN_MONTHS, ODD_MONTHS};
+module.exports = { TOTAL_BROKER_RECORDS, DEFAULT_DATE };
