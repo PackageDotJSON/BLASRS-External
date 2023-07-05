@@ -4,7 +4,7 @@ const path = require("path");
 const db2 = require("ibm_db");
 const fs = require("fs");
 const API_ENDPOINTS = require("../constants/api-endpoints.constant");
-const DB_QUERIES = require("../constants/db-queries.constant");
+const DB_QUERIES = require("../constants/sql-scripts.constant");
 const oracleDb = require("../client/oracle-client");
 const dotenv = require("dotenv");
 const {
@@ -375,7 +375,7 @@ router.post(
 
       const isDateValid = validateDate(periodEnded);
 
-      if(isDateValid.error === true) {
+      if (isDateValid.error === true) {
         res.send(isDateValid);
         return;
       }
@@ -404,6 +404,10 @@ router.post(
               type: oracleDb.BLOB,
               val: blobData,
             },
+            uploadId: {
+              dir: oracleDb.BIND_OUT,
+              type: oracleDb.NUMBER,
+            },
           };
 
           oracleDb.getConnection(
@@ -428,6 +432,7 @@ router.post(
                 bindParams,
                 async (err, results) => {
                   if (!err) {
+                    const uploadId = results.outBinds.uploadId[0];
                     const data = await readExcelData(req.file.path);
 
                     const bindVariables = data.map((row) => [
@@ -436,6 +441,7 @@ router.post(
                       companyName,
                       companyIncno,
                       submittedBy,
+                      uploadId,
                       row[0],
                       row[1],
                       row[2],
@@ -447,8 +453,9 @@ router.post(
                       bindVariables,
                       async (err, results) => {
                         if (!err) {
-                          await conn.commit();
                           deleteFileFromDirectory(req.file.path);
+                          await dataTransformation(uploadId);
+                          await conn.commit();
                           res.send({
                             statusCode: 200,
                             message: "File Uploaded Successfully",
@@ -495,6 +502,66 @@ router.post(
     }
   }
 );
+
+const dataTransformation = async (uploadId) => {
+  oracleDb.getConnection(
+    {
+      user: process.env.ORACLEDB_USER,
+      password: process.env.ORACLEDB_PASSWORD,
+      connectString: process.env.ORACLEDB_CONNECT_STRING,
+      autoCommit: true,
+    },
+    (err, conn) => {
+      if (!err) {
+        console.log("Connected to the database successfully");
+      } else {
+        console.log(
+          "Error occurred while trying to connect to the database: " +
+            err.message
+        );
+      }
+
+      conn.execute(
+        DB_QUERIES.DATA_TRANSFORMATION_DEBIT_AMOUNT,
+        [uploadId],
+        (err, results) => {
+          if (!err) {
+            conn.execute(
+              DB_QUERIES.DATA_TRANSFORMATION_CREDIT_AMOUNT,
+              [uploadId],
+              (err, results) => {
+                if (!err) {
+                  console.log("Data transformed successfully");
+                } else {
+                  console.log(
+                    "Error occurred while transforming data for credit in Oracle " +
+                      err.message
+                  );
+                }
+              }
+            );
+          } else {
+            console.log(
+              "Error occurred while transforming data for debit in Oracle " +
+                err.message
+            );
+          }
+
+          conn.release((err) => {
+            if (!err) {
+              console.log("Connection closed with the database");
+            } else {
+              console.log(
+                "Error occurred while closing the connection with the database " +
+                  err.message
+              );
+            }
+          });
+        }
+      );
+    }
+  );
+};
 
 /**
  * API Endpoint to authenticate the user

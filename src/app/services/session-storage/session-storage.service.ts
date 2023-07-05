@@ -16,7 +16,7 @@ export class SessionStorageService {
     return sessionStorage.removeItem(key);
   }
 
-  clearLocalStorage() {
+  clearSessionStorage() {
     sessionStorage.clear();
   }
 }

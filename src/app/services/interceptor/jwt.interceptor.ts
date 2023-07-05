@@ -59,7 +59,7 @@ export class JwtInterceptor implements HttpInterceptor, OnDestroy {
           if (event instanceof HttpResponse) {
             event.body.statusCode === 401 &&
               (this.toastService.error(event.body.message),
-              this.sessionStorageService.clearLocalStorage(),
+              this.sessionStorageService.clearSessionStorage(),
               this.router.navigateByUrl(APP_ROUTES.LOGIN_URL));
           }
         },

@@ -15,7 +15,7 @@ export class HeaderComponent {
   ) {}
 
   logOut() {
-    this.sessionStorageService.clearLocalStorage();
+    this.sessionStorageService.clearSessionStorage();
     this.router.navigateByUrl(APP_ROUTES.LOGIN_URL);
   }
 }
