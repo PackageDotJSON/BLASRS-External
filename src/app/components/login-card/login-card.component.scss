@@ -42,3 +42,13 @@ h6 {
 .custom-error {
     color: red;
 }
+
+.custom-help {
+    margin-left: 68%;
+    color: #155799;
+    text-decoration: underline;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

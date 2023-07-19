@@ -3,6 +3,7 @@ import { LandingPageComponent } from '../pages/landing-page/landing-page.compone
 import { LoginComponent } from '../pages/login/login.component';
 import { AuthGuard } from '../services/guards/auth.guard';
 import { NotLoggedInGuard } from '../services/guards/not-logged-in.guard';
+import { HelpComponent } from '../pages/help/help.component';
 
 export const appRoutes: Routes = [
   {
@@ -17,6 +18,10 @@ export const appRoutes: Routes = [
         path: 'home',
         component: LandingPageComponent,
         canActivate: [AuthGuard],
+      },
+      {
+        path: 'help',
+        component: HelpComponent,
       },
       {
         path: '**',

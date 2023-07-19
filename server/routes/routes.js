@@ -254,7 +254,15 @@ router.post(
 
     if (isFileValid.statusCode === 200) {
       const totalRecords = await validateSubmissionRecord(filePath);
-      isFileValid = { ...isFileValid, data: { ...totalRecords } };
+      if (
+        !totalRecords.error ||
+        totalRecords.message ===
+          "The total Debit amount is not equal to the total Credit amount"
+      ) {
+        isFileValid = { ...isFileValid, data: { ...totalRecords } };
+      } else {
+        isFileValid = { ...totalRecords };
+      }
     }
 
     deleteFileFromDirectory(filePath);
@@ -529,9 +537,10 @@ const dataTransformation = async (uploadId) => {
             conn.execute(
               DB_QUERIES.DATA_TRANSFORMATION_CREDIT_AMOUNT,
               [uploadId],
-              (err, results) => {
+              async (err, results) => {
                 if (!err) {
                   console.log("Data transformed successfully");
+                  await conn.commit();
                 } else {
                   console.log(
                     "Error occurred while transforming data for credit in Oracle " +
@@ -546,17 +555,6 @@ const dataTransformation = async (uploadId) => {
                 err.message
             );
           }
-
-          conn.release((err) => {
-            if (!err) {
-              console.log("Connection closed with the database");
-            } else {
-              console.log(
-                "Error occurred while closing the connection with the database " +
-                  err.message
-              );
-            }
-          });
         }
       );
     }
@@ -596,7 +594,7 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
             });
           } else {
             res.send({
-              statusCode: 401,
+              statusCode: 402,
               message: "Invalid Credentials",
               error: true,
             });

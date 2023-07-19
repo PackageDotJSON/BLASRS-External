@@ -4,6 +4,9 @@
       <img src="assets/images/blasrs-logo.png" height="40" />
     </a>
     <img id="secp-logo-img" src="assets/images/secplogo.png" height="60" />
-    <button type="button" class="btn btn-success" (click)="logOut()">Sign Out</button>
+    <div>
+      <button type="button" class="btn btn-success" [routerLink]="helpUrl">Help</button> |
+      <button type="button" class="btn btn-success" (click)="logOut()">Sign Out</button>
+    </div>
   </div>
 </nav>

@@ -17,6 +17,7 @@ export class LoginCardComponent implements OnInit, OnDestroy {
   authForm!: FormGroup;
   isResponseValid = false;
   subscription = new Subscription();
+  readonly helpUrl = APP_ROUTES.HELP_URL;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -85,6 +86,6 @@ export class LoginCardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

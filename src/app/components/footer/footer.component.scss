@@ -11,5 +11,14 @@
     /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
     color: white;
-    text-align: center;
+
+    #custom-left {
+        float: left;
+        padding-left: 0.5%;
+    }
+
+    #custom-right {
+        float: right;
+        padding-right: 0.5%;
+    }
 }

@@ -9,6 +9,8 @@ import { SessionStorageService } from 'src/app/services/session-storage/session-
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
+  readonly helpUrl = APP_ROUTES.HELP_URL;
+
   constructor(
     private sessionStorageService: SessionStorageService,
     private router: Router

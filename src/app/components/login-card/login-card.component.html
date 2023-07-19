@@ -132,6 +132,9 @@
           formControlName="userPin"
         />
       </div>
+      <div class="custom-help">
+        <small [routerLink]="helpUrl">Help?</small>
+      </div>
       <ng-container
         *ngIf="
           authForm.get('userPin')?.dirty || authForm.get('userPin')?.touched
@@ -162,6 +165,6 @@
     <app-loader *ngIf="isResponseValid"></app-loader>
   </div>
   <div class="card-footer">
-    <small>Developed by IS&TD</small>
+    <small>Developed by I&AD</small>
   </div>
 </div>

@@ -1,5 +1,5 @@
 const xlsxFile = require("read-excel-file/node");
-const { TOTAL_BROKER_RECORDS } = require("../constants/app.constant");
+const { TOTAL_BROKER_RECORDS, REGULAR_EXPRESSION_EXCEL_SHEET } = require("../constants/app.constant");
 const {
   FILE_TEMPLATE_CONTENT,
   FILE_SECONDARY_CODES,
@@ -57,33 +57,39 @@ const validateSubmissionRecord = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
     let totalDebit = 0;
     let totalCredit = 0;
-    let stringError = false;
 
     for (let i = 1; i < rows.length; i++) {
       if (typeof totalDebit !== "number" || typeof totalCredit !== "number") {
-        stringError = true;
-        break;
+        return {
+          totalDebit,
+          totalCredit,
+          message: 'The data type of Debit or Credit column has been altered.',
+          error: true,
+        };
+      }
+
+      if(REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][1]) || REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][2])) {
+        return {
+          totalDebit,
+          totalCredit,
+          message: 'The Debit or the Credit column contains an invalid entry.',
+          error: true
+        }
       }
 
       totalDebit = totalDebit + rows[i][1];
       totalCredit = totalCredit + rows[i][2];
     }
 
-    if (stringError) {
-      return {
-        totalDebit,
-        totalCredit,
-        error: true,
-      };
-    }
-
     if (totalDebit !== totalCredit) {
       return {
         totalDebit,
         totalCredit,
+        message: 'The total Debit amount is not equal to the total Credit amount',
         error: true,
       };
     }
+
     return {
       totalDebit,
       totalCredit,

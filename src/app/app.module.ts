@@ -17,6 +17,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { appRoutes } from './routes/routes';
 import { LoginCardComponent } from './components/login-card/login-card.component';
 import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.settings';
+import { HelpComponent } from './pages/help/help.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.set
     LoaderComponent,
     LoginComponent,
     LoginCardComponent,
+    HelpComponent,
   ],
   imports: [
     BrowserModule,
