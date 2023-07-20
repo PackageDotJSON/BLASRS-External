@@ -1,1 +1,11 @@
-<router-outlet></router-outlet>
+<div class="custom-align" *ngIf="!timeOut">
+  <img class="img-fluid" src="assets/images/loading-logo.png" />
+  <br /><br />
+  <div class="spinner-border text-success" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<ng-container *ngIf="timeOut">
+  <router-outlet></router-outlet>
+</ng-container>
