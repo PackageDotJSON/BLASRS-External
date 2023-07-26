@@ -33,7 +33,7 @@ const validateBrokerSubmission = async (filePath) => {
           return {
             statusCode: 406,
             message:
-              "Invalid Description or Secondary Codes has been found in the file. Please follow the given template.",
+              "Invalid Description or Secondary Codes have been found in the file. Please follow the given template.",
             error: true,
           };
         }
