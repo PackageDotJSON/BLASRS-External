@@ -72,7 +72,16 @@ const validateSubmissionRecord = async (filePath) => {
         return {
           totalDebit,
           totalCredit,
-          message: 'The Debit or the Credit column contains an invalid entry.',
+          message: 'The Debit or the Credit column contains an incorrect value.',
+          error: true
+        }
+      }
+
+      if(rows[i][1] < 0 || rows[i][2] < 0) {
+        return {
+          totalDebit,
+          totalCredit,
+          message: 'The Debit or the Credit column contains a negative value.',
           error: true
         }
       }
@@ -85,7 +94,7 @@ const validateSubmissionRecord = async (filePath) => {
       return {
         totalDebit,
         totalCredit,
-        message: 'The total Debit amount is not equal to the total Credit amount',
+        message: 'The total Debit amount is not equal to the total Credit amount.',
         error: true,
       };
     }

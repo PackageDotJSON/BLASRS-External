@@ -3,4 +3,5 @@ export interface ISubmission {
     1: number,
     2: Date,
     3: Date
+    4: number
 }

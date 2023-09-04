@@ -137,6 +137,8 @@ export class UploadSheetModalComponent
       recordCount: RECORD.COUNT,
       periodEnded: this.periodEnded,
       uploadFile: this.sheetForm.get('sheetUpload')!.value,
+      totalCredit: this.serverResponse.data.totalCredit,
+      totalDebit: this.serverResponse.data.totalDebit,
     };
 
     const formData = new FormData();

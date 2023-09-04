@@ -9,4 +9,6 @@ export interface IBrokerSubmission {
   recordCount: number;
   periodEnded: string;
   uploadFile: File;
+  totalCredit: number;
+  totalDebit: number;
 }

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const { TOKEN_EXPIRY } = require("../constants/app.constant");
 dotenv.config();
 
 const privateKey = process.env.PRIVATE_KEY;
@@ -10,7 +11,7 @@ const privateKey = process.env.PRIVATE_KEY;
  * @returns a unique token
  */
 const generateToken = (cuin) => {
-  return (token = jwt.sign({cuin}, privateKey, {expiresIn: '20m'}));
+  return (token = jwt.sign({cuin}, privateKey, {expiresIn: TOKEN_EXPIRY}));
 };
 
 const verifyToken = (token) => {

@@ -379,7 +379,19 @@ router.post(
         submittedBy,
         recordCount,
         periodEnded,
+        totalCredit,
+        totalDebit,
       } = req.body;
+
+      if (totalDebit !== totalCredit) {
+        res.send({
+          statusCode: 406,
+          message:
+            "The total Debit amount is not equal to the total Credit amount.",
+          error: true,
+        });
+        return;
+      }
 
       const isDateValid = validateDate(periodEnded);
 
@@ -441,51 +453,72 @@ router.post(
                 async (err, results) => {
                   if (!err) {
                     const uploadId = results.outBinds.uploadId[0];
-                    const data = await readExcelData(req.file.path);
+                    let isEmptyFlag;
 
-                    const bindVariables = data.map((row) => [
-                      userId,
-                      companyId,
-                      companyName,
-                      companyIncno,
-                      submittedBy,
-                      uploadId,
-                      row[0],
-                      row[1],
-                      row[2],
-                      row[3],
-                    ]);
+                    totalCredit < 1 && totalDebit < 1
+                      ? (isEmptyFlag = 1)
+                      : (isEmptyFlag = 0);
 
-                    conn.executeMany(
-                      DB_QUERIES.INSERT_FILE_DATA,
-                      bindVariables,
+                    conn.execute(
+                      DB_QUERIES.INSERT_FLAG_DATA,
+                      [uploadId, isEmptyFlag],
                       async (err, results) => {
                         if (!err) {
-                          deleteFileFromDirectory(req.file.path);
-                          await dataTransformation(uploadId);
-                          await conn.commit();
-                          res.send({
-                            statusCode: 200,
-                            message: "File Uploaded Successfully",
-                            error: false,
-                          });
+                          const data = await readExcelData(req.file.path);
+
+                          const bindVariables = data.map((row) => [
+                            userId,
+                            companyId,
+                            companyName,
+                            companyIncno,
+                            submittedBy,
+                            uploadId,
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3],
+                          ]);
+
+                          conn.executeMany(
+                            DB_QUERIES.INSERT_FILE_DATA,
+                            bindVariables,
+                            async (err, results) => {
+                              if (!err) {
+                                deleteFileFromDirectory(req.file.path);
+                                await dataTransformation(uploadId);
+                                await conn.commit();
+                                res.send({
+                                  statusCode: 200,
+                                  message: "File Uploaded Successfully",
+                                  error: false,
+                                });
+                              } else {
+                                console.log(
+                                  "Error occurred while inserting file data in Oracle" +
+                                    err.message
+                                );
+                              }
+
+                              conn.release((err) => {
+                                if (!err) {
+                                  console.log(
+                                    "Connection closed with the database"
+                                  );
+                                } else {
+                                  console.log(
+                                    "Error occurred while closing the connection with the database " +
+                                      err.message
+                                  );
+                                }
+                              });
+                            }
+                          );
                         } else {
                           console.log(
-                            "Error occurred while inserting file data in Oracle" +
+                            "Error occurred while insert flag data in Oracle " +
                               err.message
                           );
                         }
-
-                        conn.release((err) => {
-                          if (!err) {
-                            console.log("Connection closed with the database");
-                          } else {
-                            console.log(
-                              "Error occurred while closing the connection with the database " +
-                                err.message
-                            );
-                          }
-                        });
                       }
                     );
                   } else {

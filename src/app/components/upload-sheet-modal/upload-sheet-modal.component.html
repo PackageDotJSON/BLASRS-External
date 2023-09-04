@@ -49,9 +49,51 @@
               aria-label="Upload"
               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             />
-            <small class="custom-error-message" *ngIf="sheetForm.invalid">
+            <!-- <small class="custom-error-message" *ngIf="sheetForm.invalid">
               The file name is too long or, it's empty. Please upload a valid
               excel(<b>.xlsx</b>) file of less than 1 MB.
+            </small> -->
+          </div>
+          <div
+            *ngIf="
+              sheetForm.get('sheetUpload')?.invalid ||
+              sheetForm.get('sheetUpload')?.dirty ||
+              sheetForm.get('sheetUpload')?.touched
+            "
+            class="custom-error-message"
+          >
+            <small *ngIf="sheetForm.get('sheetUpload')?.hasError('required')">
+              Please select an Excel Sheet to upload.
+            </small>
+
+            <small
+              *ngIf="sheetForm.get('sheetUpload')?.hasError('invalidMinName')"
+            >
+              The Excel Sheet name is too short or invalid.
+            </small>
+
+            <small
+              *ngIf="sheetForm.get('sheetUpload')?.hasError('invalidType')"
+            >
+              The selected file is not a valid Excel Sheet.
+            </small>
+
+            <small
+              *ngIf="sheetForm.get('sheetUpload')?.hasError('invalidMaxSize')"
+            >
+              The Excel Sheet exceeds the maximum file size limit.
+            </small>
+
+            <small
+              *ngIf="sheetForm.get('sheetUpload')?.hasError('invalidMinSize')"
+            >
+              The Excel Sheet is smaller than the minimum file size limit.
+            </small>
+
+            <small
+              *ngIf="sheetForm.get('sheetUpload')?.hasError('invalidMaxName')"
+            >
+              The Excel Sheet name is too long.
             </small>
           </div>
 
@@ -89,7 +131,7 @@
           Please confirm the below details. Once the file has been submitted it
           cannot be changed.
         </p>
-        <p>The file you are trying to upload contains: </p>
+        <p>The file you are trying to upload contains:</p>
         <div class="table-responsive">
           <table class="table table-bordered table-striped">
             <thead>
