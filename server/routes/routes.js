@@ -486,6 +486,7 @@ router.post(
                               if (!err) {
                                 deleteFileFromDirectory(req.file.path);
                                 await dataTransformation(uploadId);
+                                await logsGeneration(req.ip, companyIncno);
                                 await conn.commit();
                                 res.send({
                                   statusCode: 200,
@@ -586,6 +587,42 @@ const dataTransformation = async (uploadId) => {
             console.log(
               "Error occurred while transforming data for debit in Oracle " +
                 err.message
+            );
+          }
+        }
+      );
+    }
+  );
+};
+
+const logsGeneration = async (userIp, brokerCuin) => {
+  oracleDb.getConnection(
+    {
+      user: process.env.ORACLEDB_USER,
+      password: process.env.ORACLEDB_PASSWORD,
+      connectString: process.env.ORACLEDB_CONNECT_STRING,
+      autoCommit: true,
+    },
+    (err, conn) => {
+      if (!err) {
+        console.log("Connected to the database successfully");
+      } else {
+        console.log(
+          "Error occurred while trying to connect to the database: " +
+            err.message
+        );
+      }
+
+      conn.execute(
+        DB_QUERIES.INSERT_LOG,
+        [userIp, brokerCuin],
+        async (err, results) => {
+          if (!err) {
+            console.log("Log inserted successfully");
+            await conn.commit();
+          } else {
+            console.log(
+              "Error occurred while inserting log in Oracle " + err.message
             );
           }
         }
