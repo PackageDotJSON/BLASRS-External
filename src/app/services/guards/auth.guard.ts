@@ -7,8 +7,8 @@ import { UserState } from 'src/app/state-management/user.state';
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate, OnDestroy {
-  isActivate = false;
-  subscription = new Subscription();
+  private isActivate = false;
+  private subscription = new Subscription();
 
   constructor(private userState: UserState) {}
 

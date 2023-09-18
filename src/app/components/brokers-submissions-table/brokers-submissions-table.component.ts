@@ -28,7 +28,7 @@ export class BrokersSubmissionsTableComponent
   @Input() newFiling!: string;
   @Output() openModalEvent = new EventEmitter<boolean>();
   brokerSubmissions$!: Observable<ISubmission[]>;
-  subscription = new Subscription();
+  private subscription = new Subscription();
   isLoading = true;
   isFileDownloading = false;
 

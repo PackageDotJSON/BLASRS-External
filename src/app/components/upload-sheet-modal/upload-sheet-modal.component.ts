@@ -41,7 +41,7 @@ export class UploadSheetModalComponent
   isValidResponse = false;
   periodEnded!: string;
   isResponseReceived = true;
-  subscription = new Subscription();
+  private subscription = new Subscription();
 
   constructor(
     private formBuilder: FormBuilder,

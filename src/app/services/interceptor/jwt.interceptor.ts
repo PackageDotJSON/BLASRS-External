@@ -16,7 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor, OnDestroy {
-  subscription = new Subscription();
+  private subscription = new Subscription();
   constructor(
     private userState: UserState,
     private sessionStorageService: SessionStorageService,

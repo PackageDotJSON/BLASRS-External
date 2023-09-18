@@ -16,7 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 export class LoginCardComponent implements OnInit, OnDestroy {
   authForm!: FormGroup;
   isResponseValid = false;
-  subscription = new Subscription();
+  private subscription = new Subscription();
   readonly helpUrl = APP_ROUTES.HELP_URL;
 
   constructor(

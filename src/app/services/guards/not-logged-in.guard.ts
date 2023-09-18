@@ -7,8 +7,8 @@ import { UserState } from 'src/app/state-management/user.state';
   providedIn: 'root',
 })
 export class NotLoggedInGuard implements CanActivate, OnDestroy {
-  isLoggedIn = false;
-  subscription = new Subscription();
+  private isLoggedIn = false;
+  private subscription = new Subscription();
 
   constructor(private userState: UserState) {}
 
