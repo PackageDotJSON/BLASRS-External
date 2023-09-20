@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  baseUrl: 'http://172.16.198.24:3002'
+  baseUrl: 'https://srfsctc.secp.gov.pk:3002'
 };

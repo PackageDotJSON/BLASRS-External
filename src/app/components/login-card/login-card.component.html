@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" [@Enter]="'flyIn'">
   <div class="col-lg-4 col-md-6 col-sm-10 col-12 mx-auto">
     <div class="card">
       <div class="card-header">
@@ -48,7 +48,8 @@
           </div>
           <ng-container
             *ngIf="
-              authForm.get('userCnic')?.dirty || authForm.get('userCnic')?.touched
+              authForm.get('userCnic')?.dirty ||
+              authForm.get('userCnic')?.touched
             "
           >
             <small
@@ -93,7 +94,8 @@
           </div>
           <ng-container
             *ngIf="
-              authForm.get('userCuin')?.dirty || authForm.get('userCuin')?.touched
+              authForm.get('userCuin')?.dirty ||
+              authForm.get('userCuin')?.touched
             "
           >
             <small
@@ -172,4 +174,3 @@
     </div>
   </div>
 </div>
-
