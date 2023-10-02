@@ -66,7 +66,7 @@
             </small>
           </ng-container>
           <div class="input-group">
-            <span class="input-group-text" id="basic-addon1"
+            <span class="input-group-text" id="basic-addon2"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -88,7 +88,7 @@
               class="form-control"
               placeholder="CUIN"
               aria-label="CUIN"
-              aria-describedby="basic-addon1"
+              aria-describedby="basic-addon2"
               formControlName="userCuin"
             />
           </div>
@@ -112,7 +112,7 @@
             </small>
           </ng-container>
           <div class="input-group">
-            <span class="input-group-text" id="basic-addon1">
+            <span class="input-group-text" id="basic-addon3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -130,10 +130,10 @@
             <input
               type="password"
               class="form-control"
-              placeholder="PIN"
-              aria-label="PIN"
-              aria-describedby="basic-addon1"
-              formControlName="userPin"
+              placeholder="Password"
+              aria-label="Password"
+              aria-describedby="basic-addon3"
+              formControlName="userPassword"
             />
           </div>
           <div class="custom-help">
@@ -141,20 +141,21 @@
           </div>
           <ng-container
             *ngIf="
-              authForm.get('userPin')?.dirty || authForm.get('userPin')?.touched
+              authForm.get('userPassword')?.dirty ||
+              authForm.get('userPassword')?.touched
             "
           >
             <small
               class="custom-error"
-              *ngIf="authForm.get('userPin')?.errors?.['required']"
+              *ngIf="authForm.get('userPassword')?.errors?.['required']"
             >
-              PIN is required
+              Password is required
             </small>
             <small
               class="custom-error"
-              *ngIf="authForm.get('userPin')?.errors?.['pattern']"
+              *ngIf="authForm.get('userPassword')?.errors?.['maxlength']"
             >
-              PIN should consist of 4 digits
+              Password cannot be too long
             </small>
           </ng-container>
           <br />

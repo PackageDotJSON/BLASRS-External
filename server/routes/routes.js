@@ -82,31 +82,27 @@ router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
         );
       }
 
-      conn.execute(
-        DB_QUERIES.FETCH_SUBMISSIONS,
-        [userCnic, userCuin],
-        (err, results) => {
+      conn.execute(DB_QUERIES.FETCH_SUBMISSIONS, [userCuin], (err, results) => {
+        if (!err) {
+          res.send(results.rows);
+        } else {
+          console.log(
+            "Error occurred while fetching the submissions in Oracle " +
+              err.message
+          );
+        }
+
+        conn.release((err) => {
           if (!err) {
-            res.send(results.rows);
+            console.log("Connection closed with the database");
           } else {
             console.log(
-              "Error occurred while fetching the submissions in Oracle " +
+              "Error occurred while closing the connection with the database " +
                 err.message
             );
           }
-
-          conn.release((err) => {
-            if (!err) {
-              console.log("Connection closed with the database");
-            } else {
-              console.log(
-                "Error occurred while closing the connection with the database " +
-                  err.message
-              );
-            }
-          });
-        }
-      );
+        });
+      });
     }
   );
 });
@@ -291,7 +287,7 @@ const validateSubmission = (userId, companyIncno, periodEnded) => {
 
         conn.execute(
           DB_QUERIES.FETCH_SUBMISSIONS,
-          [userId, companyIncno],
+          [companyIncno],
           (err, results) => {
             if (!err) {
               if (results.rows.length === 0) {
@@ -633,11 +629,12 @@ const logsGeneration = async (userIp, brokerCuin) => {
 
 /**
  * API Endpoint to authenticate the user
- * @param {userCnic, userCuin, userPin}
+ * @param {userCnic, userCuin, userPassword}
  */
 
 router.post(API_ENDPOINTS.AUTH, (req, res) => {
-  const { userCnic, userCuin, userPin } = req.body;
+  const { userCnic, userCuin, userPassword } = req.body;
+  const privateKey = process.env.PASSWORD_DECRYPTION_KEY;
 
   db2.open(db2Config, (err, conn) => {
     if (!err) {
@@ -648,16 +645,77 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
 
     conn.query(
       DB_QUERIES.AUTH_USER,
-      [userCnic, userCuin, userPin],
+      [userCnic, userCuin, privateKey, userPassword],
       (err, results) => {
         if (!err) {
-          if (results[0]?.SIGNATORY_ALLOWED === "YES") {
+          if (results[0]) {
             res.send({
               data: {
                 token: generateToken(userCuin),
                 companyName: results[0].COMPANY_NAME,
                 companyId: results[0].COMPANY_ID,
               },
+              statusCode: 200,
+              message: "Authenticated",
+              error: false,
+            });
+          } else {
+            res.send({
+              statusCode: 402,
+              message: "Invalid Credentials",
+              error: true,
+            });
+          }
+        } else {
+          console.log(
+            "Error occurred while searching for all the data: " + err.message
+          );
+        }
+
+        conn.close((err) => {
+          if (!err) {
+            console.log("Connection closed with the database");
+          } else {
+            console.log(
+              "Error occurred while trying to close the connection with the database " +
+                err.message
+            );
+          }
+        });
+      }
+    );
+  });
+});
+
+router.post(API_ENDPOINTS.VERIFY_PIN_CODE, (req, res) => {
+  const token = req.get("Authorization");
+  const isTokenValid = verifyToken(token);
+
+  if (isTokenValid !== true) {
+    res.send({
+      statusCode: 401,
+      message: "Session Expired",
+      error: true,
+    });
+    return;
+  }
+
+  const { userCnic, userPin } = req.body;
+
+  db2.open(db2Config, (err, conn) => {
+    if (!err) {
+      console.log("Connected Successfully");
+    } else {
+      console.log("Error occurred while connecting with DB2: " + err.message);
+    }
+
+    conn.query(
+      DB_QUERIES.AUTH_PIN_CODE,
+      [userCnic, userPin],
+      (err, results) => {
+        if (!err) {
+          if (results[0]) {
+            res.send({
               statusCode: 200,
               message: "Authenticated",
               error: false,

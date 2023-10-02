@@ -54,7 +54,7 @@ export class LoginCardComponent implements OnInit, OnDestroy {
         [Validators.required, Validators.pattern('^[0-9]{13}$')],
       ],
       userCuin: [null, [Validators.required, Validators.pattern('^[0-9]{7}$')]],
-      userPin: [null, [Validators.required, Validators.pattern('^[0-9]{4}$')]],
+      userPassword: [null, [Validators.required, Validators.maxLength(40)]],
     });
   }
 
@@ -86,10 +86,6 @@ export class LoginCardComponent implements OnInit, OnDestroy {
               this.sessionStorageService.setData(
                 SESSION_STORAGE_KEY.USER_CUIN,
                 this.authForm.value.userCuin
-              );
-              this.sessionStorageService.setData(
-                SESSION_STORAGE_KEY.USER_PIN,
-                this.authForm.value.userPin
               );
               this.router.navigateByUrl(APP_ROUTES.HOME_URL);
             } else {

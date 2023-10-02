@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from '../enums/api-endpoints.enum';
 import { TEMPLATE_REQUEST_RESPONSE_TYPE } from '../settings/app.settings';
 import { ISubmission } from '../models/submissions.model';
 import { IResponse } from '../models/response.model';
+import { IPin } from '../models/login.model';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +36,13 @@ export class BrokersSubmissionService {
   uploadSubmission(payload: FormData) {
     return this.http.post(
       BASE_URL + API_ENDPOINTS.UPLOAD_SUBMISSION,
+      payload
+    ) as Observable<IResponse>;
+  }
+
+  verifyPinCode(payload: IPin) {
+    return this.http.post(
+      BASE_URL + API_ENDPOINTS.VERIFY_PIN_CODE,
       payload
     ) as Observable<IResponse>;
   }

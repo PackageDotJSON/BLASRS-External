@@ -1,5 +1,9 @@
 export interface ILogin {
-  userCnic: number;
-  userCuin: number;
-  userPin: number;
+  userCnic: string;
+  userCuin?: string;
+  userPassword?: string;
+}
+
+export interface IPin extends ILogin {
+  userPin: string;
 }

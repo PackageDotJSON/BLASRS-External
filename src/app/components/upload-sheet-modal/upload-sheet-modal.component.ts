@@ -22,6 +22,7 @@ import {
   DEBIT_CREDIT_INEQUALITY_ERROR,
   DEBIT_CREDIT_STRING_ERROR,
 } from 'src/app/settings/app.settings';
+import { IPin } from 'src/app/models/login.model';
 
 @Component({
   selector: 'app-upload-sheet-modal',
@@ -37,6 +38,7 @@ export class UploadSheetModalComponent
   @Output() closeModalEvent = new EventEmitter<boolean>();
   @Output() newSubmissionEvent = new EventEmitter<string>();
   sheetForm!: FormGroup;
+  pinCode = '';
   serverResponse!: IResponse;
   isValidResponse = false;
   periodEnded!: string;
@@ -150,7 +152,17 @@ export class UploadSheetModalComponent
     return formData;
   }
 
-  uploadConfirmation() {
+  verifyPinCode() {
+    const payload: IPin = {
+      userCnic: this.sessionStorageService.getData(
+        SESSION_STORAGE_KEY.USER_CNIC
+      )!,
+      userPin: this.pinCode,
+    };
+    return this.brokerSubmissionService.verifyPinCode(payload).toPromise();
+  }
+
+  async uploadConfirmation() {
     if (this.serverResponse.data.error === true) {
       if (
         typeof this.serverResponse.data.totalCredit !== 'number' ||
@@ -164,6 +176,17 @@ export class UploadSheetModalComponent
     }
 
     this.isResponseReceived = false;
+
+    const verify = await this.verifyPinCode();
+
+    if (verify?.statusCode !== 200 && verify?.message !== 'Authenticated') {
+      this.isResponseReceived = true;
+      this.isValidResponse = true;
+      verify!.message = 'Invalid PIN Code';
+      this.toastService.error(verify?.message);
+      return;
+    }
+
     const payload = this.generatePayload();
 
     this.subscription.add(
