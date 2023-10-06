@@ -1,4 +1,5 @@
 const express = require("express");
+const helmet = require('helmet');
 const cors = require("cors");
 const http = require("http");
 const routes = require("./routes/routes");
@@ -7,6 +8,8 @@ const path = require("path");
 const compression = require("compression");
 const dotenv = require("dotenv");
 dotenv.config();
+
+app.use(helmet());
 
 app.use(compression());
 
