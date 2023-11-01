@@ -649,16 +649,59 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
       (err, results) => {
         if (!err) {
           if (results[0]) {
-            res.send({
-              data: {
-                token: generateToken(userCuin),
-                companyName: results[0].COMPANY_NAME,
-                companyId: results[0].COMPANY_ID,
+            const { companyName, companyId } = results[0];
+            oracleDb.getConnection(
+              {
+                user: process.env.ORACLEDB_USER,
+                password: process.env.ORACLEDB_PASSWORD,
+                connectString: process.env.ORACLEDB_CONNECT_STRING,
+                autoCommit: true,
               },
-              statusCode: 200,
-              message: "Authenticated",
-              error: false,
-            });
+              (err, conn) => {
+                if (!err) {
+                  console.log("Connected to the database successfully");
+                } else {
+                  console.log(
+                    "Error occurred while trying to connect to the database: " +
+                      err.message
+                  );
+                }
+
+                conn.execute(
+                  DB_QUERIES.AUTH_BROKER,
+                  [userCuin],
+                  async (err, results) => {
+                    if (!err) {
+                      if (results.rows.length > 0) {
+                        await logsGeneration(req.ip, userCuin);
+                        res.send({
+                          data: {
+                            token: generateToken(userCuin),
+                            companyName,
+                            companyId,
+                          },
+                          statusCode: 200,
+                          message: "Authenticated",
+                          error: false,
+                        });
+                      } else {
+                        res.send({
+                          statusCode: 403,
+                          message:
+                            "Access forbidden. The company is not registered as a brokerage house.",
+                          error: true,
+                        });
+                      }
+                    } else {
+                      console.log(
+                        "Error occurred while trying to login ",
+                        err.message
+                      );
+                    }
+                  }
+                );
+              }
+            );
           } else {
             res.send({
               statusCode: 402,
