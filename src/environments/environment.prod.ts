@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  baseUrl: 'https://srfsctc.secp.gov.pk:3002'
+  baseUrl: 'https://blasrs2.secp.gov.pk'
 };

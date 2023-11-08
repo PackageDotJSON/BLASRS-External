@@ -64,6 +64,12 @@ export class JwtInterceptor implements HttpInterceptor, OnDestroy {
           }
         },
         (error) => {
+          if (error.status === 429) {
+            this.toastService.error(error.message);
+            this.sessionStorageService.clearSessionStorage();
+            this.router.navigateByUrl(APP_ROUTES.LOGIN_URL);
+            return;
+          }
           this.toastService.error(
             'An unknown error has occurred. Please close the pop-up and attempt to upload again.',
             'Major Error',

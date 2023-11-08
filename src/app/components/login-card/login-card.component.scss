@@ -1,5 +1,5 @@
 .row {
-    margin: 8% auto;
+    margin: 2% auto;
 }
 
 .card {
@@ -54,4 +54,8 @@ h6 {
     &:hover {
         cursor: pointer;
     }
+}
+
+.custom-left {
+    margin-left: 4%;
 }
