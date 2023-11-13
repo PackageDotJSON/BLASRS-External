@@ -649,7 +649,7 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
       (err, results) => {
         if (!err) {
           if (results[0]) {
-            const { companyName, companyId } = results[0];
+            const { companyId, companyName } = results[0];
             oracleDb.getConnection(
               {
                 user: process.env.ORACLEDB_USER,
