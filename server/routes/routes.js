@@ -634,6 +634,23 @@ const logsGeneration = async (userIp, brokerCuin) => {
 
 router.post(API_ENDPOINTS.AUTH, (req, res) => {
   const { userCnic, userCuin, userPassword } = req.body;
+  let userCnicRegex = /^[0-9]{13}$/;
+  let userCuinRegex = /^[0-9]{7}$/;
+  let userPasswordRegex = /^.{1,40}$/;
+
+  if (
+    !userCnicRegex.test(userCnic) ||
+    !userCuinRegex.test(userCuin) ||
+    !userPasswordRegex.test(userPassword)
+  ) {
+    res.send({
+      statusCode: 400,
+      message: "Bad Request. Invalid CNIC or Incorporation Number or Password.",
+      error: true,
+    });
+    return;
+  }
+
   const privateKey = process.env.PASSWORD_DECRYPTION_KEY;
 
   db2.open(db2Config, (err, conn) => {

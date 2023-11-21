@@ -165,12 +165,14 @@
               *ngIf="authForm.get('userPassword')?.errors?.['required']"
             >
               Password is required
+              <br />
             </small>
             <small
               class="custom-error"
               *ngIf="authForm.get('userPassword')?.errors?.['maxlength']"
             >
               Password cannot be too long
+              <br />
             </small>
           </ng-container>
           <button
