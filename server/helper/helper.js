@@ -1,10 +1,14 @@
 const xlsxFile = require("read-excel-file/node");
-const { TOTAL_BROKER_RECORDS, REGULAR_EXPRESSION_EXCEL_SHEET } = require("../constants/app.constant");
+const {
+  TOTAL_BROKER_RECORDS,
+  REGULAR_EXPRESSION_EXCEL_SHEET,
+} = require("../constants/app.constant");
 const {
   FILE_TEMPLATE_CONTENT,
   FILE_SECONDARY_CODES,
 } = require("../constants/file-template.constant");
 const fs = require("fs");
+const PRIMARY_CODES = require("../constants/primary-codes.constant");
 
 const validateBrokerSubmission = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
@@ -57,44 +61,66 @@ const validateSubmissionRecord = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
     let totalDebit = 0;
     let totalCredit = 0;
+    let primaryDebit = 0;
+    let primaryCredit = 0;
 
     for (let i = 1; i < rows.length; i++) {
       if (typeof totalDebit !== "number" || typeof totalCredit !== "number") {
         return {
           totalDebit,
           totalCredit,
-          message: 'The data type of Debit or Credit column has been altered.',
+          message: "The data type of Debit or Credit column has been altered.",
           error: true,
         };
       }
 
-      if(REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][1]) || REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][2])) {
+      if (
+        REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][1]) ||
+        REGULAR_EXPRESSION_EXCEL_SHEET.test(rows[i][2])
+      ) {
         return {
           totalDebit,
           totalCredit,
-          message: 'The Debit or the Credit column contains an incorrect value.',
-          error: true
-        }
+          message:
+            "The Debit or the Credit column contains an incorrect value.",
+          error: true,
+        };
       }
 
-      if(rows[i][1] < 0 || rows[i][2] < 0) {
+      if (rows[i][1] < 0 || rows[i][2] < 0) {
         return {
           totalDebit,
           totalCredit,
-          message: 'The Debit or the Credit column contains a negative value.',
-          error: true
-        }
+          message: "The Debit or the Credit column contains a negative value.",
+          error: true,
+        };
       }
 
-      totalDebit = totalDebit + rows[i][1];
-      totalCredit = totalCredit + rows[i][2];
+      if (!PRIMARY_CODES.includes(rows[i][3])) {
+        totalDebit = totalDebit + rows[i][1];
+        totalCredit = totalCredit + rows[i][2];
+      } else {
+        primaryDebit = primaryDebit + rows[i][1];
+        primaryCredit = primaryCredit + rows[i][2];
+      }
+    }
+
+    if (primaryDebit > totalDebit || primaryCredit > totalCredit) {
+      return {
+        totalDebit,
+        totalCredit,
+        message:
+          "The values entered against the secondary codes cannot be empty.",
+        error: true,
+      };
     }
 
     if (totalDebit !== totalCredit) {
       return {
         totalDebit,
         totalCredit,
-        message: 'The total Debit amount is not equal to the total Credit amount.',
+        message:
+          "The total Debit amount is not equal to the total Credit amount.",
         error: true,
       };
     }
@@ -122,19 +148,19 @@ const validateDate = (periodEnded) => {
     };
   }
 
-  if(month < Number(period[1])) {
+  if (month < Number(period[1])) {
     return {
       statusCode: 406,
       message: "You cannot upload the submission of the next month.",
       error: true,
-    }
+    };
   }
 
   return {
     statusCode: 200,
-    message: 'Ok',
-    error: false
-  }
+    message: "Ok",
+    error: false,
+  };
 };
 
 const readExcelData = async (filePath) => {
