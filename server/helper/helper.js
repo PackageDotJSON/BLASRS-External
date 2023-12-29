@@ -11,6 +11,7 @@ const fs = require("fs");
 const {
   PARENT_CODES,
   GRAND_PARENT_CODES,
+  GREAT_GRAND_PARENT_CODES,
 } = require("../constants/primary-codes.constant");
 
 const validateBrokerSubmission = async (filePath) => {
@@ -69,6 +70,8 @@ const validateSubmissionRecord = async (filePath) => {
     let parentCredit = 0;
     let grandParentDebit = 0;
     let grandParentCredit = 0;
+    let greatGrandParentDebit = 0;
+    let greatGrandParentCredit = 0;
 
     for (let i = 1; i < rows.length; i++) {
       if (typeof totalDebit !== "number" || typeof totalCredit !== "number") {
@@ -108,30 +111,55 @@ const validateSubmissionRecord = async (filePath) => {
       } else if (GRAND_PARENT_CODES.includes(rows[i][3])) {
         grandParentDebit = grandParentDebit + rows[i][1];
         grandParentCredit = grandParentCredit + rows[i][2];
+      } else if (GREAT_GRAND_PARENT_CODES.includes(rows[i][3])) {
+        greatGrandParentDebit = greatGrandParentDebit + rows[i][1];
+        greatGrandParentCredit = greatGrandParentCredit + rows[i][2];
       } else {
         totalDebit = totalDebit + rows[i][1];
         totalCredit = totalCredit + rows[i][2];
       }
     }
 
-    if (grandParentDebit > parentDebit || grandParentCredit > parentCredit) {
-      return {
-        totalDebit,
-        totalCredit,
-        message:
-          "The sum of debit or credit for the secondary codes does not match with the primary codes.",
-        error: true,
-      };
+    if (greatGrandParentDebit !== 0 && greatGrandParentCredit !== 0) {
+      if (
+        greatGrandParentDebit !== grandParentDebit ||
+        greatGrandParentCredit !== grandParentCredit
+      ) {
+        return {
+          totalDebit,
+          totalCredit,
+          message:
+            "The values for 'CURRENT ASSETS' or 'REVENUE' exceed the sum of values mentioned in their relevant secondary codes.",
+          error: true,
+        };
+      }
     }
 
-    if (parentDebit > totalDebit || parentCredit > totalCredit) {
-      return {
-        totalDebit,
-        totalCredit,
-        message:
-          "The sum of debit or credit for the secondary codes does not match with the primary codes.",
-        error: true,
-      };
+    if (grandParentDebit !== 0 && grandParentCredit !== 0) {
+      if (
+        grandParentDebit !== parentDebit ||
+        grandParentCredit !== parentCredit
+      ) {
+        return {
+          totalDebit,
+          totalCredit,
+          message:
+            "The sum of debit or credit for the secondary codes does not match with the values mentioned in their respective primary codes.",
+          error: true,
+        };
+      }
+    }
+
+    if (parentDebit !== 0 && parentCredit !== 0) {
+      if (parentDebit !== totalDebit || parentCredit !== totalCredit) {
+        return {
+          totalDebit,
+          totalCredit,
+          message:
+            "The sum of debit or credit for the secondary codes does not match with the values mentioned in their respective primary codes.",
+          error: true,
+        };
+      }
     }
 
     if (totalDebit !== totalCredit) {
