@@ -8,7 +8,10 @@ const {
   FILE_SECONDARY_CODES,
 } = require("../constants/file-template.constant");
 const fs = require("fs");
-const PRIMARY_CODES = require("../constants/primary-codes.constant");
+const {
+  PARENT_CODES,
+  GRAND_PARENT_CODES,
+} = require("../constants/primary-codes.constant");
 
 const validateBrokerSubmission = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
@@ -61,8 +64,11 @@ const validateSubmissionRecord = async (filePath) => {
   return xlsxFile(filePath).then((rows) => {
     let totalDebit = 0;
     let totalCredit = 0;
-    let primaryDebit = 0;
-    let primaryCredit = 0;
+
+    let parentDebit = 0;
+    let parentCredit = 0;
+    let grandParentDebit = 0;
+    let grandParentCredit = 0;
 
     for (let i = 1; i < rows.length; i++) {
       if (typeof totalDebit !== "number" || typeof totalCredit !== "number") {
@@ -96,21 +102,34 @@ const validateSubmissionRecord = async (filePath) => {
         };
       }
 
-      if (!PRIMARY_CODES.includes(rows[i][3])) {
+      if (PARENT_CODES.includes(rows[i][3])) {
+        parentDebit = parentDebit + rows[i][1];
+        parentCredit = parentCredit + rows[i][2];
+      } else if (GRAND_PARENT_CODES.includes(rows[i][3])) {
+        grandParentDebit = grandParentDebit + rows[i][1];
+        grandParentCredit = grandParentCredit + rows[i][2];
+      } else {
         totalDebit = totalDebit + rows[i][1];
         totalCredit = totalCredit + rows[i][2];
-      } else {
-        primaryDebit = primaryDebit + rows[i][1];
-        primaryCredit = primaryCredit + rows[i][2];
       }
     }
 
-    if (primaryDebit > totalDebit || primaryCredit > totalCredit) {
+    if (grandParentDebit > parentDebit || grandParentCredit > parentCredit) {
       return {
         totalDebit,
         totalCredit,
         message:
-          "The values entered against the secondary codes cannot be empty.",
+          "The sum of debit or credit for the secondary codes does not match with the primary codes.",
+        error: true,
+      };
+    }
+
+    if (parentDebit > totalDebit || parentCredit > totalCredit) {
+      return {
+        totalDebit,
+        totalCredit,
+        message:
+          "The sum of debit or credit for the secondary codes does not match with the primary codes.",
         error: true,
       };
     }
