@@ -821,15 +821,6 @@ router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
 
   const uploadId = req.query.uploadId;
 
-  if (uploadId !== cuin) {
-    res.send({
-      statusCode: 401,
-      message: "You are not authorized to download files of another broker.",
-      error: true,
-    });
-    return;
-  }
-
   if (isTokenValid !== true) {
     res.send({
       statusCode: 401,
@@ -855,8 +846,16 @@ router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
         );
       }
 
-      conn.execute(DB_QUERIES.GET_FILE, [uploadId], async (err, results) => {
+      conn.execute(DB_QUERIES.GET_FILE, [uploadId, cuin], async (err, results) => {
         if (!err) {
+          if(results.rows.length === 0) {
+            res.send({
+              statusCode: 401,
+              message: "No file found.",
+              error: true,
+            });
+            return;
+          }
           const blob = results.rows[0][0];
           const excelData = await blob.getData();
 
