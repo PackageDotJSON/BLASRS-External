@@ -30,7 +30,8 @@ const db2Config = Buffer.from(
 
 router.get(API_ENDPOINTS.TEMPLATE, async (req, res) => {
   const token = req.get("Authorization");
-  const isTokenValid = verifyToken(token);
+  const cuin = req.get("Cuin")
+  const isTokenValid = verifyToken(token, cuin);
 
   if (isTokenValid !== true) {
     res.send({
@@ -55,7 +56,8 @@ router.get(API_ENDPOINTS.GET_SUBMISSIONS, (req, res) => {
   const { userCnic, userCuin } = req.query;
 
   const token = req.get("Authorization");
-  const isTokenValid = verifyToken(token);
+  const cuin = req.get("Cuin")
+  const isTokenValid = verifyToken(token, cuin);
 
   if (isTokenValid !== true) {
     res.send({
@@ -111,7 +113,8 @@ router.get(API_ENDPOINTS.GET_PERIOD_ENDED_DATE, (req, res) => {
   const userCuin = req.query.userCuin;
 
   const token = req.get("Authorization");
-  const isTokenValid = verifyToken(token);
+  const cuin = req.get("Cuin")
+  const isTokenValid = verifyToken(token, cuin);
 
   if (isTokenValid !== true) {
     res.send({
@@ -231,7 +234,8 @@ router.post(
   uploadAlert.single("sheetUpload"),
   async (req, res) => {
     const token = req.get("Authorization");
-    const isTokenValid = verifyToken(token);
+    const cuin = req.get("Cuin")
+    const isTokenValid = verifyToken(token, cuin);
 
     if (isTokenValid !== true) {
       res.send({
@@ -353,7 +357,8 @@ router.post(
   uploadAlert.single("uploadFile"),
   (req, res) => {
     const token = req.get("Authorization");
-    const isTokenValid = verifyToken(token);
+    const cuin = req.get("Cuin")
+    const isTokenValid = verifyToken(token, cuin);
 
     if (isTokenValid !== true) {
       res.send({
@@ -749,7 +754,8 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
 
 router.post(API_ENDPOINTS.VERIFY_PIN_CODE, (req, res) => {
   const token = req.get("Authorization");
-  const isTokenValid = verifyToken(token);
+  const cuin = req.get("Cuin")
+  const isTokenValid = verifyToken(token, cuin);
 
   if (isTokenValid !== true) {
     res.send({
@@ -810,7 +816,8 @@ router.post(API_ENDPOINTS.VERIFY_PIN_CODE, (req, res) => {
 
 router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
   const token = req.get("Authorization");
-  const isTokenValid = verifyToken(token);
+  const cuin = req.get("Cuin")
+  const isTokenValid = verifyToken(token, cuin);
 
   const uploadId = req.query.uploadId;
 

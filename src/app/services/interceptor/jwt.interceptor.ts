@@ -30,6 +30,7 @@ export class JwtInterceptor implements HttpInterceptor, OnDestroy {
   ): Observable<HttpEvent<any>> {
     let userState;
     let jwtToken;
+    let cuin;
 
     this.subscription.add(
       this.userState
@@ -43,13 +44,17 @@ export class JwtInterceptor implements HttpInterceptor, OnDestroy {
     );
 
     userState === true &&
-      (jwtToken = this.sessionStorageService.getData(
+      ((jwtToken = this.sessionStorageService.getData(
         SESSION_STORAGE_KEY.TOKEN
-      ));
+      )),
+      (cuin = this.sessionStorageService.getData(
+        SESSION_STORAGE_KEY.USER_CUIN
+      )));
 
     httpRequest = httpRequest.clone({
       setHeaders: {
         Authorization: `Bearer ${jwtToken}`,
+        Cuin: `${cuin}`,
       },
     });
 
