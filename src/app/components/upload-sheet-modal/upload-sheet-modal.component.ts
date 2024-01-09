@@ -120,9 +120,7 @@ export class UploadSheetModalComponent
       userId: this.sessionStorageService.getData(
         SESSION_STORAGE_KEY.USER_CNIC
       )!,
-      userPin: this.sessionStorageService.getData(
-        SESSION_STORAGE_KEY.USER_PIN
-      )!,
+      userPin: this.pinCode,
       recordType: RECORD.TYPE,
       companyId: this.sessionStorageService.getData(
         SESSION_STORAGE_KEY.COMPANY_ID
