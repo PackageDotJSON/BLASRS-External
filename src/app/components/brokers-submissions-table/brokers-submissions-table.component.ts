@@ -11,11 +11,15 @@ import {
 import { BrokersSubmissionService } from 'src/app/services/brokers-submission.service';
 import { tap } from 'rxjs/operators';
 import { DownloadFileService } from 'src/app/services/download-file.service';
-import { TEMPLATE_FILE_SETTINGS } from 'src/app/settings/app.settings';
+import {
+  EMPTY_FILE_ERROR,
+  TEMPLATE_FILE_SETTINGS,
+} from 'src/app/settings/app.settings';
 import { Subscription, Observable } from 'rxjs';
 import { ISubmission } from 'src/app/models/submissions.model';
 import { SESSION_STORAGE_KEY } from 'src/app/enums/session-storage-key.enum';
 import { SessionStorageService } from 'src/app/services/session-storage/session-storage.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-brokers-submissions-table',
@@ -35,7 +39,8 @@ export class BrokersSubmissionsTableComponent
   constructor(
     private brokersSubmissionService: BrokersSubmissionService,
     private downloadFileService: DownloadFileService,
-    private sessionStorageService: SessionStorageService
+    private sessionStorageService: SessionStorageService,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -96,10 +101,14 @@ export class BrokersSubmissionsTableComponent
         .downloadSubmission(uploadId)
         .pipe(
           tap((res) => {
-            this.downloadFileService.downloadFileToDesktop(
-              res,
-              TEMPLATE_FILE_SETTINGS.TYPE
-            );
+            if (res.type === TEMPLATE_FILE_SETTINGS.TYPE) {
+              this.downloadFileService.downloadFileToDesktop(
+                res,
+                TEMPLATE_FILE_SETTINGS.TYPE
+              );
+            } else {
+              this.toastService.error(EMPTY_FILE_ERROR);
+            }
             this.isFileDownloading = false;
           })
         )

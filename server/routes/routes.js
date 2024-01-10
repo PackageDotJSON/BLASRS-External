@@ -846,44 +846,56 @@ router.get(API_ENDPOINTS.DOWNLOAD_SUBMISSION, (req, res) => {
         );
       }
 
-      conn.execute(DB_QUERIES.GET_FILE, [uploadId, cuin], async (err, results) => {
-        if (!err) {
-          if(results.rows.length === 0) {
-            res.send({
-              statusCode: 401,
-              message: "No file found.",
-              error: true,
-            });
-            return;
-          }
-          const blob = results.rows[0][0];
-          const excelData = await blob.getData();
-
-          const filePath = path.join(
-            __dirname,
-            "../template/download-submission.xlsx"
-          );
-          fs.writeFileSync(filePath, excelData);
-
-          res.sendFile(filePath);
-        } else {
-          console.log(
-            "Error occurred while getting the submission file in Oracle " +
-              err.message
-          );
-        }
-
-        conn.release((err) => {
+      conn.execute(
+        DB_QUERIES.GET_FILE,
+        [uploadId, cuin],
+        async (err, results) => {
           if (!err) {
-            console.log("Connection closed with the database");
+            if (results.rows.length === 0) {
+              res.send({
+                statusCode: 401,
+                message: "No file found.",
+                error: true,
+              });
+              return;
+            }
+            if (!results.rows[0][0]) {
+              res.send({
+                statusCode: 401,
+                message: "File does not contain any data.",
+                error: true,
+              });
+              return;
+            }
+            const blob = results.rows[0][0];
+            const excelData = await blob.getData();
+
+            const filePath = path.join(
+              __dirname,
+              "../template/download-submission.xlsx"
+            );
+            fs.writeFileSync(filePath, excelData);
+
+            res.sendFile(filePath);
           } else {
             console.log(
-              "Error occurred while closing the connection with the database " +
+              "Error occurred while getting the submission file in Oracle " +
                 err.message
             );
           }
-        });
-      });
+
+          conn.release((err) => {
+            if (!err) {
+              console.log("Connection closed with the database");
+            } else {
+              console.log(
+                "Error occurred while closing the connection with the database " +
+                  err.message
+              );
+            }
+          });
+        }
+      );
     }
   );
 });
