@@ -1,7 +1,7 @@
 const TOTAL_BROKER_RECORDS = 914;
 const DEFAULT_DATE = "31/01/2023";
 const REGULAR_EXPRESSION_EXCEL_SHEET = /[a-zA-Z!@#$%^&*()]/;
-const TOKEN_EXPIRY = "10m";
+const TOKEN_EXPIRY = "30m";
 
 module.exports = {
   TOTAL_BROKER_RECORDS,

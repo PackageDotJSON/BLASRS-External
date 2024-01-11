@@ -185,16 +185,24 @@ const validateDate = (periodEnded) => {
   const date = new Date();
 
   const month = date.getMonth();
+  const year = date.getFullYear();
 
   const periodMonth = Number(period[1]);
+  const periodYear = Number(period[2]);
 
-  if(periodMonth !== 12) {
-    if (month < periodMonth) {
+  if(year === periodYear) {
+    if(month < periodMonth) {
       return {
         statusCode: 406,
         message: "You cannot upload the submission of the next month.",
         error: true,
-      };
+      }
+    }
+  } else if(periodYear > year) {
+    return {
+      statusCode: 406,
+      message: "You cannot upload the submission of the next year.",
+      error: true,
     }
   }
 
