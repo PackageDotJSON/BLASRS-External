@@ -485,9 +485,11 @@ router.post(
                             bindVariables,
                             async (err, results) => {
                               if (!err) {
+                                const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
                                 deleteFileFromDirectory(req.file.path);
                                 await dataTransformation(uploadId);
-                                await logsGeneration(req.ip, companyIncno);
+                                await logsGeneration(ip, companyIncno);
                                 await conn.commit();
                                 res.send({
                                   statusCode: 200,
@@ -695,7 +697,9 @@ router.post(API_ENDPOINTS.AUTH, (req, res) => {
                   async (err, results) => {
                     if (!err) {
                       if (results.rows.length > 0) {
-                        await logsGeneration(req.ip, userCuin);
+                        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+                        await logsGeneration(ip, userCuin);
                         res.send({
                           data: {
                             token: generateToken(userCuin),
