@@ -18,6 +18,7 @@ import { appRoutes } from './routes/routes';
 import { LoginCardComponent } from './components/login-card/login-card.component';
 import { HTTP_INTERCEPTOR_SETTINGS, LOCATION_STRATEGY } from './settings/app.settings';
 import { HelpComponent } from './pages/help/help.component';
+import { VideoModalComponent } from './components/video-modal/video-modal.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { HelpComponent } from './pages/help/help.component';
     LoginComponent,
     LoginCardComponent,
     HelpComponent,
+    VideoModalComponent,
   ],
   imports: [
     BrowserModule,
