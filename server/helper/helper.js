@@ -45,6 +45,15 @@ const validateBrokerSubmission = async (filePath) => {
             error: true,
           };
         }
+        if(typeof rows[i][1] !== 'number' || typeof rows[i][2] !== 'number') {
+          return {
+            statusCode: 406,
+            message:
+              `The row ${i + 1} contains a number as a text value in either Debit or Credit column. 
+              Please convert it to numeric format and upload again.`,
+            error: true,
+          };
+        }
       }
       return {
         statusCode: 200,

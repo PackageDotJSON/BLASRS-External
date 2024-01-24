@@ -501,6 +501,11 @@ router.post(
                                   "Error occurred while inserting file data in Oracle" +
                                     err.message
                                 );
+                                res.send({
+                                  statusCode: 400,
+                                  message: "Bad Request. Encountered unknown issue. Contact the SECP for the resolution.",
+                                  error: true,
+                                })
                               }
 
                               conn.release((err) => {
